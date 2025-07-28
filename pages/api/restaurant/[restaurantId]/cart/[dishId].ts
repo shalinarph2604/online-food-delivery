@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextApiRequest, NextApiResponse } from "next";
 
 import serverAuth from "@/libs/serverAuth";
@@ -26,32 +27,32 @@ export default async function handler(
         }
 
         if (req.method === 'PATCH') {
-            const { quantity } = req.body
+            const { quantity, notes } = req.body
 
             if (quantity < 1 || typeof quantity !== 'number') {
                 return res.status(400).json({ message: 'There\'s no item in the cart' })
             }
 
-            const { data: updatedCart, error }= await supabase 
+            const updateItem: any = {}
+                if (quantity !== undefined) updateItem.quantity = quantity
+                if (notes !== undefined) updateItem.notes = notes
+
+            const { data: updatedCart, error: updatedError }= await supabase 
                 .from('cart')
-                .update({ 
-                    quantity
-                })
+                .update(updateItem)
                 .eq('dish_id', dishId)
                 .eq('user_id', currentUser.id)
                 .eq('restaurant_id', restaurantId)
                 .select()
                 .single()
 
-                if (error) {
-                    return res.status(400).json({ error: 'Failed to update cart' })
-                }
+                if (updatedError) throw new Error ('Failed to update cart')
 
-                return res.status(200).json(updatedCart)
+            return res.status(200).json(updatedCart)
         }
 
         if (req.method === 'DELETE') {
-            const { data: deletedCart, error } = await supabase
+            const { data: deletedCart, error: deletedError } = await supabase
                 .from('cart')
                 .delete()
                 .eq('dish_id', dishId)
@@ -60,27 +61,22 @@ export default async function handler(
                 .select()
                 .single()
 
-            if (error) {
-                return res.status(400).json({ error: 'Failed to delete cart item' } )
-            }
+                if (deletedError) throw new Error ('Failed to delete cart item')
 
             return res.status(200).json(deletedCart)
         }
 
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ error: 'This is our mistakes: Internal server error' })
+    } catch (error: any) {
+        console.error('Error in dish API:', error)
+        return res.status(500).json({ message: error.message || 'Internal server error' })
     }
 }
 
-// User klik +
+// User clicks +
+// If item is not in cart yet > frontend sends POST /api/cart > server inserts a new row.
+// If item is already in cart → frontend sends PATCH /api/cart/:itemId with quantity + 1.
 
-// Kalau item belum ada di cart → frontend kirim POST /api/cart → server insert row baru.
-
-// Kalau item sudah ada di cart → frontend kirim PATCH /api/cart/:itemId dengan quantity + 1.
-
-// User klik -
-
-// Kalau quantity > 1 → frontend kirim PATCH /api/cart/:itemId dengan quantity - 1.
-
-// Kalau quantity = 1 dan user klik - → frontend kirim DELETE /api/cart/:itemId.
+// User clicks -
+// If item is in cart with quantity > 1
+// If quantity > 1 → frontend sends PATCH /api/cart/:itemId with quantity - 1.
+// If quantity === 1 → frontend sends DELETE /api/cart/:itemId to remove the item from cart

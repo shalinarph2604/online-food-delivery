@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextApiRequest, NextApiResponse } from "next";
 import supabase from "@/libs/supabase";
 
@@ -13,23 +14,25 @@ export default async function handler(
     try {
         const { restaurantId } = req.query;
 
-        if (typeof restaurantId !== 'string') {
-            throw new Error('Invalid restaurant ID')
-        }
+            if (!restaurantId || typeof restaurantId !== 'string') {
+                return res.status(400).json({ error: 'Invalid restaurant ID' });
+            }
 
-        const { data: dishes } = await supabase
+        const { data, error } = await supabase
             .from('dishes')
             .select('*')
             .eq('restaurant_id', restaurantId);
 
-        if (!dishes) {
-            return res.status(404).json({ error: 'Dishes not found' });
-        }
+            if (error) throw new Error('Error fetching dishes')
 
-        return res.status(200).json(dishes);
+            if (!data) {
+                return res.status(404).json({ error: 'Dishes not found' });
+            }
 
-    } catch (error) {
-        console.log(error);
-        return res.status(400).end()
+        return res.status(200).json(data);
+
+    } catch (error: any) {
+        console.error('Error in restaurant menu API:', error);
+        return res.status(500).json({ message: error.message || 'Internal server error' });
     }
 }

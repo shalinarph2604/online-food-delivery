@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextApiRequest, NextApiResponse } from 'next'
 import supabase from '@/libs/supabase'
 import serverAuth from '@/libs/serverAuth'
@@ -25,9 +26,7 @@ export default async function handler(
                 .eq('id', currentUser.id)
                 .single()
             
-            if (errorBalance) {
-                return res.status(400).json({ message: 'User not found' })
-            }
+            if (errorBalance) throw new Error('Failed to retrieve balance')
 
             if (userBalance.balance === 0 || userBalance.balance === null) {
                 return res.status(200).json({ balance: 0 })
@@ -49,13 +48,12 @@ export default async function handler(
                 .select('balance')
                 .single()
 
-            if (errorUpdating || !updatedBalance) {
-                return res.status(400).json({ message: 'Failed to update balance' })
-            }
+                if (errorUpdating || !updatedBalance) throw new Error('Failed to update balance')
+
             return res.status(200).json(updatedBalance)
         }
-    } catch (error) {
-        console.log(error)
-        return res.status(500).end()
+    } catch (error: any) {
+        console.log('Error in user balance API:', error)
+        return res.status(500).json({ message: error.message || 'Internal server error' })
     }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // API for a specific checkout by ID
 // isinya tracking status order, estimated delivery time, alamat, maps, total price, payment method, notes, tombol cancel order
 // data di checkoutId akan dipakai untuk progress order page
@@ -21,14 +22,13 @@ export default async function handler (
 
     try {
         const { currentUser } = await serverAuth(req, res)
-
             if (!currentUser) {
                 return res.status(401).json({ message: 'User not authenticated' })
             }
 
         const { checkoutId } = req.query
 
-            if (typeof checkoutId !== 'string') {
+            if (!checkoutId || typeof checkoutId !== 'string') {
                 return res.status(400).json({ message: 'Invalid checkout ID' })
             }
 
@@ -41,22 +41,16 @@ export default async function handler (
                 .eq('user_id', currentUser.id)
                 .single()
                 
-                if (checkoutError) {
-                    return res.status(400).json({ message: 'Failed to retrieve checkout data' })
-                }
+                if (checkoutError) throw new Error ('Failed to retrieve checkout data')
 
-                if (!checkout) {
-                    return res.status(404).json({ message: 'Checkout data not found' })
-                }
+                if (!checkout) return res.status(404).json({ message: 'Checkout data not found' })
 
             const { data: checkoutItems, error: itemsError } = await supabase
                 .from('checkout_items')
                 .select('*')
                 .eq('checkout_id', checkoutId)
 
-                if (itemsError) {
-                    return res.status(500).json({ message: 'Failed to retrieve checkout items' })
-                }
+                if (itemsError) throw new Error ('Failed to retrieve checkout items')
 
             return res.status(200).json({ checkout, items: checkoutItems })
         }
@@ -70,9 +64,7 @@ export default async function handler (
                 .eq('checkout_id', checkoutId)
                 .select()
 
-                if (itemsError) {
-                    return res.status(400).json({ message: 'Failed to delete checkout items' })
-                }
+                if (itemsError) throw new Error('Failed to delete checkout items')
 
             const { data: deletedCheckout, error: deleteError } = await supabase
                 .from('checkout')
@@ -82,9 +74,8 @@ export default async function handler (
                 .select()
                 .single()
 
-                if (deleteError) {
-                    return res.status(400).json({ message: 'Failed to delete checkout' })
-                }
+                if (deleteError) throw new Error('Failed to delete checkout')
+
             return res.status(200).json({ deletedCheckout, deletedItems })
         }
     
@@ -105,14 +96,12 @@ export default async function handler (
                 .select()
                 .single()
 
-            if (updateError || !updatedStatus) {
-                return res.status(400).json({ message: 'Failed to update order status' })
-            }
+                if (updateError) throw new Error ('Failed to update order status')
 
             return res.status(200).json(updatedStatus)
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error in checkout API:', error)
-        return res.status(500).json({ message: 'Internal server error' })
+        return res.status(500).json({ message: error.message || 'Internal server error' })
     }
 }

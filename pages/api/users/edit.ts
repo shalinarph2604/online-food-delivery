@@ -29,21 +29,18 @@ export default async function handler(
         if (phone !== undefined) updateData.phone = phone
         if (bio !== undefined) updateData.bio = bio
 
-        const { data: userData, error: userError } = await supabase
+        const { data: editedData, error: editedError } = await supabase
             .from('users')
             .update(updateData)
             .eq('id', currentUser.id)
             .select('username, name, bio, address, phone')
             .single()
 
-        if (userError) {
-            console.log(userError)
-            return res.status(400).end()
-        }
+        if (editedError) throw new Error('Failed to update user data')
 
-        return res.status(200).json(userData)
-    } catch (error) {
-        console.log(error)
-        return res.status(500).end()
+        return res.status(200).json(editedData)
+    } catch (error: any) {
+        console.error('Error in edit user profile:', error)
+        return res.status(500).json({ message: error.message || 'Internal server error' })
     }
 }
