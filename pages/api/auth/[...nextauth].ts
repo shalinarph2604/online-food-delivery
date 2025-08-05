@@ -4,7 +4,7 @@ import { SupabaseAdapter } from "@next-auth/supabase-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import supabase from "../../../libs/supabase";
 
-export const handler = {
+export const authOptions = {
     adapter: SupabaseAdapter({
         url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
         secret: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -41,4 +41,4 @@ export const handler = {
     ],
 }
 
-export default NextAuth(handler);
+export default NextAuth(authOptions);
