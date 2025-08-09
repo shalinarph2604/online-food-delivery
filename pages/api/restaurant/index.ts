@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import supabase from "@/libs/supabase";
 
-export default async function hanlder(
+export default async function handler (
     req: NextApiRequest,
     res: NextApiResponse,
 ) {
@@ -10,13 +10,18 @@ export default async function hanlder(
     }
 
     try {
-        const restaurants = await supabase
+        const { data: restaurants } = await supabase
             .from('restaurants')
             .select('*')
 
-        return res.status(200).json(restaurants.data)
+        if (!restaurants || restaurants.length === 0) {
+            return res.status(404).json({ error: 'No restaurants found' })
+        }
+
+        return res.status(200).json(restaurants)
+
     } catch (error) {
         console.log(error)
-        return res.status(400).json({ error: 'Failed to fetch restaurants' })
+        return res.status(400).end()
     }
 }
