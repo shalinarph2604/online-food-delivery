@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// main page, to GET all restaurants
 import { NextApiRequest, NextApiResponse } from "next";
 import supabase from "@/libs/supabase";
 
-// main page, to GET all restaurants
 export default async function handler (
     req: NextApiRequest,
     res: NextApiResponse,
