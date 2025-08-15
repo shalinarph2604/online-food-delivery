@@ -16,17 +16,16 @@ export default async function handler(
             throw new Error('Invalid restaurant ID')
         }
 
-        const { data: restaurant } = await supabase
-            .from('restaurants')
+        const { data: dishes } = await supabase
+            .from('dishes')
             .select('*')
-            .eq('id', restaurantId)
-            .single();
+            .eq('restaurant_id', restaurantId);
 
-        if (!restaurant) {
-            return res.status(404).json({ error: 'Restaurant not found' });
+        if (!dishes) {
+            return res.status(404).json({ error: 'Dishes not found' });
         }
 
-        return res.status(200).json(restaurant);
+        return res.status(200).json(dishes);
 
     } catch (error) {
         console.log(error);
