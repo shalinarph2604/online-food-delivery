@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import supabase from "@/libs/supabase";
 
+// to GET the menu of each restaurant
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse,

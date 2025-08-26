@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextApiRequest, NextApiResponse } from "next";
 
 import serverAuth from "@/libs/serverAuth";
@@ -26,21 +27,15 @@ export default async function handler(
                 return res.status(400).json({ message: 'Invalid restaurant ID' })
             }
 
-            const { data: cart, error } = await supabase
+            const { data: cart, error: cartError } = await supabase
                 .from('cart')
                 .select('*')
                 .eq('restaurant_id', restaurantId)
                 .eq('user_id', currentUser.id);
 
-                if (error) {
-                    return res.status(400).json({ error: 'Failed to retrieve cart items' });
-                }
+                if (cartError) throw new Error('Failed to retrieve cart')
 
-                if (!cart) {
-                    return res.status(404).json({ message: 'Cart is empty' });
-                }
-
-                return res.status(200).json(cart)
+            return res.status(200).json(cart)
         }
 
         if (req.method === 'POST') {
@@ -50,7 +45,7 @@ export default async function handler(
                 return res.status(400).json({ message: 'Invalid dish ID or quantity' })
             }
 
-            const { data: updatedCart, error } = await supabase
+            const { data: updatedCart, error: updateError } = await supabase
                 .from('cart')
                 .insert([
                     {
@@ -63,15 +58,13 @@ export default async function handler(
                 .select()
                 .single()
 
-                if (error) {
-                    return res.status(400).json({ error: 'Failed to add item to cart' });
-                }
+                if (updateError) throw new Error('Failed to add item to cart')
 
-                return res.status(200).json(updatedCart)
+            return res.status(200).json(updatedCart)
         }
 
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ error: 'This is our mistakes: Internal server error' });
+    } catch (error: any) {
+        console.error('Error in cart API:', error)
+        return res.status(500).json({ message: error.message || 'Internal server error' })
     }
 }
