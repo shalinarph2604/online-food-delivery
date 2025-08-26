@@ -26,48 +26,52 @@ export default async function handler(
                 throw new Error('Invalid restaurant ID')
             }
 
-            const cart = await supabase
+            const { data: cart, error } = await supabase
                 .from('cart')
                 .select('*')
                 .eq('restaurant_id', restaurantId)
                 .eq('user_id', currentUser.id);
 
-            if (!cart) {
-                return res.status(404).json({ message: 'Cart is empty' });
-            }
+                if (error) {
+                    return res.status(400).json({ error: 'Failed to retrieve cart items' });
+                }
 
-            return res.status(200).json(cart)
+                if (!cart) {
+                    return res.status(404).json({ message: 'Cart is empty' });
+                }
+
+                return res.status(200).json(cart)
         }
 
         if (req.method === 'POST') {
-            const { itemId, quantity, restaurantId } = req.body
+            const { dishId, quantity, restaurantId } = req.body
 
-            if (!itemId || typeof itemId !== 'string' || !quantity || typeof quantity !== 'number') {
-                return res.status(400).json({ message: 'Invalid item ID or quantity' })
+            if (!dishId || typeof dishId !== 'string' || !quantity || typeof quantity !== 'number') {
+                return res.status(400).json({ message: 'Invalid dish ID or quantity' })
             }
 
-            try {
-                const updatedCart = await supabase
-                    .from('cart')
-                    .insert([
-                        {
-                            user_id: currentUser.id,
-                            restaurant_id: restaurantId,
-                            item_id: itemId,
-                            quantity: quantity
-                        }
-                    ])
-                    .select()
-                    .single()
+            const { data: updatedCart, error } = await supabase
+                .from('cart')
+                .insert([
+                    {
+                        user_id: currentUser.id,
+                        restaurant_id: restaurantId,
+                        dish_id: dishId,
+                        quantity: quantity
+                    }
+                ])
+                .select()
+                .single()
+
+                if (error) {
+                    return res.status(400).json({ error: 'Failed to add item to cart' });
+                }
 
                 return res.status(200).json(updatedCart)
-            } catch (error) {
-                console.log(error);
-            }
         }
 
     } catch (error) {
         console.log(error)
-        return res.status(400).json({ error: 'Invalid request' });
+        return res.status(500).json({ error: 'This is our mistakes: Internal server error' });
     }
 }
