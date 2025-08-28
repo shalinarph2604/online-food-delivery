@@ -26,7 +26,7 @@ export default async function handler(
         }
 
         if (req.method === 'PATCH') {
-            const { quantity, notes } = req.body
+            const { quantity } = req.body
 
             if (quantity < 1 || typeof quantity !== 'number') {
                 return res.status(400).json({ message: 'There\'s no item in the cart' })
@@ -35,8 +35,7 @@ export default async function handler(
             const { data: updatedCart, error }= await supabase 
                 .from('cart')
                 .update({ 
-                    quantity,
-                    ...(notes !== undefined && { notes }), // only include notes if it's provided 
+                    quantity
                 })
                 .eq('dish_id', dishId)
                 .eq('user_id', currentUser.id)
