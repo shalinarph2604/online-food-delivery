@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import bcrypt from "bcryptjs";
+
 import { SupabaseAdapter } from "@next-auth/supabase-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import supabase from "../../../libs/supabase";

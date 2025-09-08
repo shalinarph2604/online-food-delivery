@@ -23,7 +23,7 @@ export default async function handler(
             const { restaurantId } = req.query
 
             if (typeof restaurantId !== 'string') {
-                throw new Error('Invalid restaurant ID')
+                return res.status(400).json({ message: 'Invalid restaurant ID' })
             }
 
             const { data: cart, error } = await supabase

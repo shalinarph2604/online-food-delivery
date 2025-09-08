@@ -21,7 +21,7 @@ export default async function handler (
             return res.status(401).json({ message: 'User not authenticated' })
         }
 
-        const { restaurantId, items, totalPrice, paymentMethod, notes } = req.body
+        const { restaurantId, items, paymentMethod, notes } = req.body
 
         if (!items || items.length === 0) {
             return res.status(400).json({ message: 'No items in the order' })
@@ -30,7 +30,40 @@ export default async function handler (
         if (!paymentMethod) {
             return res.status(400).json({ message: 'Payment method is required' })
         }
+    
+    // fetch user address from "users" table
+        const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select("address")
+            .eq('id', currentUser.id)
+            .single()
 
+        if (userError || !userData) {
+            return res.status(400).json({ message: 'Error fetching user data' })
+        }
+
+    // calculate total price
+        const dishIds = items.map((item: any) => item.dishId)
+
+        const { data: dishesData, error: dishesError } = await supabase
+            .from('dishes')
+            .select('id, price')
+            .in('id', dishIds)
+
+        if (dishesError || !dishesData) {
+            return res.status(400).json({ message: 'Error fetching dish data' })
+        }
+
+        let totalPrice = 0
+
+        for (const item of items) {
+            const dish = dishesData.find(d => d.id === item.dishId)
+            if (dish) {
+                totalPrice += dish.price * item.quantity
+            }
+        }
+
+    // insert data into "checkout" table
         const { data: checkout, error: checkoutError } = await supabase
             .from('checkout')
             .insert([{
@@ -38,6 +71,7 @@ export default async function handler (
                 restaurant_id: restaurantId,
                 total_price: totalPrice,
                 payment_method: paymentMethod,
+                delivery_address: userData.address, // copy the address here from "users" table
                 notes: notes || null
             }])
             .select()
@@ -46,7 +80,9 @@ export default async function handler (
             if (checkoutError) {
                 return res.status(400).json({ message: 'Error creating checkout session' })
             }
-
+    
+    // insert items into "checkout_items" table
+    // user can order more than 1 item, so we need to loop through the items
         const itemsToInsert = items.map((item: any) => ({
             checkout_id: checkout.id,
             dish_id: item.dishId,

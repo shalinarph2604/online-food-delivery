@@ -11,9 +11,13 @@ export default async function handler (
     }
 
     try {
-        const { data: restaurants } = await supabase
+        const { data: restaurants, error: restaurantsError } = await supabase
             .from('restaurants')
             .select('*')
+
+        if (restaurantsError) {
+            return res.status(400).json({ error: 'Error fetching restaurants' })
+        }
 
         if (!restaurants || restaurants.length === 0) {
             return res.status(404).json({ error: 'No restaurants found' })
@@ -23,6 +27,6 @@ export default async function handler (
 
     } catch (error) {
         console.log(error)
-        return res.status(400).end()
+        return res.status(500).end()
     }
 }
