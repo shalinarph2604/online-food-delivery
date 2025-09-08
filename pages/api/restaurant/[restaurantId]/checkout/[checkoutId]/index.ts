@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 /* eslint-disable @typescript-eslint/no-explicit-any */
+=======
+>>>>>>> 8d5c6f7 (added api for get and edit the current-user who logged in)
 // API for a specific checkout by ID
 // isinya tracking status order, estimated delivery time, alamat, maps, total price, payment method, notes, tombol cancel order
 // data di checkoutId akan dipakai untuk progress order page
@@ -22,6 +25,7 @@ export default async function handler (
 
     try {
         const { currentUser } = await serverAuth(req, res)
+<<<<<<< HEAD
             if (!currentUser) {
                 return res.status(401).json({ message: 'User not authenticated' })
             }
@@ -33,6 +37,19 @@ export default async function handler (
             }
 
         if (req.method === 'GET') {
+=======
+
+        if (!currentUser) {
+            return res.status(401).json({ message: 'User not authenticated' })
+        }
+
+        if (req.method === 'GET') {
+            const { checkoutId } = req.query
+
+            if (typeof checkoutId !== 'string') {
+                return res.status(400).json({ message: 'Invalid checkout ID' })
+            }
+>>>>>>> 8d5c6f7 (added api for get and edit the current-user who logged in)
 
             const { data: checkout, error: checkoutError } = await supabase
                 .from('checkout')
@@ -40,6 +57,7 @@ export default async function handler (
                 .eq('id', checkoutId)
                 .eq('user_id', currentUser.id)
                 .single()
+<<<<<<< HEAD
                 
                 if (checkoutError) throw new Error ('Failed to retrieve checkout data')
 
@@ -103,5 +121,17 @@ export default async function handler (
     } catch (error: any) {
         console.error('Error in checkout API:', error)
         return res.status(500).json({ message: error.message || 'Internal server error' })
+=======
+
+                if (checkoutError || !checkout) {
+                    return res.status(404).json({ message: 'Checkout data not found' })
+                }
+
+            const { data: checkoutItems, error: itemsError } = await supabase
+        }
+    } catch (error) {
+        console.error('Error in checkout API:', error)
+        return res.status(500).json({ message: 'Internal server error' })
+>>>>>>> 8d5c6f7 (added api for get and edit the current-user who logged in)
     }
 }
