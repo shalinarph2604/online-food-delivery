@@ -20,6 +20,7 @@ export default async function handler(
 
         const { username, name, hashedPassword, address, phone, bio } = req.body
 
+    // user can update one or more fields, so we need to create an object with only the fields that are provided
         const updateData: Record<string, any> = {}
         if (username !== undefined) updateData.username = username
         if (name !== undefined) updateData.name = name
