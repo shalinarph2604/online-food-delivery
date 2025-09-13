@@ -100,6 +100,9 @@ export default async function handler (
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 7728d33 (completed all HTTP method of [checkoutId] api)
     // checking user balance
         const { data: userBalance, error: balanceError } = await supabase
             .from('users')
@@ -107,7 +110,13 @@ export default async function handler (
             .eq('id', currentUser.id)
             .single()
 
+<<<<<<< HEAD
             if (balanceError) throw new Error ('Error fetching user balance')
+=======
+            if (balanceError) {
+                return res.status(400).json({ message: 'Error fetching user balance' })
+            }
+>>>>>>> 7728d33 (completed all HTTP method of [checkoutId] api)
         
         // if payment method is "balance" (using e-money), check if user has enough balance
             if (paymentMethod === 'balance') {
@@ -123,10 +132,17 @@ export default async function handler (
                 .update({ balance: updatedBalance })
                 .eq('id', currentUser.id)
 
+<<<<<<< HEAD
                 if (updateError) throw new Error ('Error updating user balance')
 
 =======
 >>>>>>> 8d5c6f7 (added api for get and edit the current-user who logged in)
+=======
+                if (updateError) {
+                    return res.status(400).json({ message: 'Error updating user balance' })
+                }
+
+>>>>>>> 7728d33 (completed all HTTP method of [checkoutId] api)
     // insert data into "checkout" table
         const { data: checkout, error: checkoutError } = await supabase
             .from('checkout')
