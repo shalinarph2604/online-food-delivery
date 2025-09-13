@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import supabase from '@/libs/supabase'
 import serverAuth from '@/libs/serverAuth'
 
+// API route to get or update user balance
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse

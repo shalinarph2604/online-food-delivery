@@ -22,16 +22,17 @@ export default async function handler (
     try {
         const { currentUser } = await serverAuth(req, res)
 
-        if (!currentUser) {
-            return res.status(401).json({ message: 'User not authenticated' })
-        }
+            if (!currentUser) {
+                return res.status(401).json({ message: 'User not authenticated' })
+            }
 
-        if (req.method === 'GET') {
-            const { checkoutId } = req.query
+        const { checkoutId } = req.query
 
             if (typeof checkoutId !== 'string') {
                 return res.status(400).json({ message: 'Invalid checkout ID' })
             }
+
+        if (req.method === 'GET') {
 
             const { data: checkout, error: checkoutError } = await supabase
                 .from('checkout')
@@ -39,12 +40,76 @@ export default async function handler (
                 .eq('id', checkoutId)
                 .eq('user_id', currentUser.id)
                 .single()
+                
+                if (checkoutError) {
+                    return res.status(400).json({ message: 'Failed to retrieve checkout data' })
+                }
 
-                if (checkoutError || !checkout) {
+                if (!checkout) {
                     return res.status(404).json({ message: 'Checkout data not found' })
                 }
 
             const { data: checkoutItems, error: itemsError } = await supabase
+                .from('checkout_items')
+                .select('*')
+                .eq('checkout_id', checkoutId)
+
+                if (itemsError) {
+                    return res.status(500).json({ message: 'Failed to retrieve checkout items' })
+                }
+
+            return res.status(200).json({ checkout, items: checkoutItems })
+        }
+
+    // this api will use for cancel order
+        if (req.method === 'DELETE') {
+
+            const { data: deletedItems, error: itemsError } = await supabase
+                .from('checkout_items')
+                .delete()
+                .eq('checkout_id', checkoutId)
+                .select()
+
+                if (itemsError) {
+                    return res.status(400).json({ message: 'Failed to delete checkout items' })
+                }
+
+            const { data: deletedCheckout, error: deleteError } = await supabase
+                .from('checkout')
+                .delete()
+                .eq('id', checkoutId)
+                .eq('user_id', currentUser.id)
+                .select()
+                .single()
+
+                if (deleteError) {
+                    return res.status(400).json({ message: 'Failed to delete checkout' })
+                }
+            return res.status(200).json({ deletedCheckout, deletedItems })
+        }
+    
+    // this api will use for update order status
+        if (req.method === 'PATCH') {
+            const { status } = req.body
+            const validStatuses = ['pending', 'preparing', 'on the way', 'delivered', 'cancelled']
+
+            if (!status || typeof status !== 'string' || !validStatuses.includes(status)) {
+                return res.status(400).json({ message: 'Invalid status value' })
+            }
+
+            const { data: updatedStatus, error: updateError } = await supabase
+                .from('checkout')
+                .update({ status })
+                .eq('id', checkoutId)
+                .eq('user_id', currentUser.id)
+                .select()
+                .single()
+
+            if (updateError || !updatedStatus) {
+                return res.status(400).json({ message: 'Failed to update order status' })
+            }
+
+            return res.status(200).json(updatedStatus)
         }
     } catch (error) {
         console.error('Error in checkout API:', error)

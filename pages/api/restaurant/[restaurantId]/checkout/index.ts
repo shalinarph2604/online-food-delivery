@@ -63,6 +63,35 @@ export default async function handler (
             }
         }
 
+    // checking user balance
+        const { data: userBalance, error: balanceError } = await supabase
+            .from('users')
+            .select('balance')
+            .eq('id', currentUser.id)
+            .single()
+
+            if (balanceError) {
+                return res.status(400).json({ message: 'Error fetching user balance' })
+            }
+        
+        // if payment method is "balance" (using e-money), check if user has enough balance
+            if (paymentMethod === 'balance') {
+                if (!userBalance || userBalance.balance < totalPrice) {
+                    return res.status(400).json({ message: 'Insufficient balance' })
+                }
+            }
+
+            const updatedBalance = userBalance.balance - totalPrice
+
+            const { error: updateError } = await supabase 
+                .from('users')
+                .update({ balance: updatedBalance })
+                .eq('id', currentUser.id)
+
+                if (updateError) {
+                    return res.status(400).json({ message: 'Error updating user balance' })
+                }
+
     // insert data into "checkout" table
         const { data: checkout, error: checkoutError } = await supabase
             .from('checkout')
