@@ -1,0 +1,1 @@
+// ini simple aja, dialog sama input aja, sama button paling

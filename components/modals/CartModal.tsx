@@ -1,0 +1,1 @@
+// ini yaa paling button + dan -, sama text area buat nambah notes

@@ -1,0 +1,1 @@
+// the UI of restaurant details, including the menu and reviews
