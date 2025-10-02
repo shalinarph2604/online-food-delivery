@@ -34,6 +34,10 @@ export default async function handler(
                 .eq('user_id', currentUser.id);
 
                 if (cartError) throw new Error('Failed to retrieve cart')
+                
+                if (!cart || cart.length === 0) {
+                    return res.status(200).json({ message: 'Your cart is empty' })
+                }
 
             return res.status(200).json(cart)
         }

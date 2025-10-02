@@ -26,13 +26,13 @@ export default async function handler (
             .select('*, checkout_items(*)')
             .eq('user_id', currentUser.id)
 
-        if (ordersError) {
-            throw new Error(ordersError.message)
-        }
+            if (ordersError) {
+                throw new Error(ordersError.message)
+            }
 
-        if (!orders || orders.length === 0) {
-            return res.status(404).json({ message: 'No orders found' })
-        }
+            if (!orders || orders.length === 0) {
+                return res.status(200).json([])
+            }
 
         return res.status(200).json(orders)
     } catch (error: any) {

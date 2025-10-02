@@ -18,18 +18,18 @@ export default async function handler(
                 return res.status(400).json({ error: 'Invalid restaurant ID' });
             }
 
-        const { data, error } = await supabase
+        const { data: dishes, error: dishesError } = await supabase
             .from('dishes')
             .select('*')
             .eq('restaurant_id', restaurantId);
 
-            if (error) throw new Error('Error fetching dishes')
+            if (dishesError) throw new Error('Error fetching dishes')
 
-            if (!data) {
-                return res.status(404).json({ error: 'Dishes not found' });
+            if (!dishes || dishes.length === 0) {
+                return res.status(200).json({ error: 'There are no dishes available for this restaurant.' });
             }
 
-        return res.status(200).json(data);
+        return res.status(200).json(dishes);
 
     } catch (error: any) {
         console.error('Error in restaurant menu API:', error);

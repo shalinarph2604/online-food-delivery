@@ -26,11 +26,11 @@ export default async function handler(
                 .eq('id', currentUser.id)
                 .single()
             
-            if (errorBalance) throw new Error('Failed to retrieve balance')
+                if (errorBalance) throw new Error('Failed to retrieve balance')
 
-            if (userBalance.balance === 0 || userBalance.balance === null) {
-                return res.status(200).json({ balance: 0 })
-            }
+                if (userBalance.balance === 0 || userBalance.balance === null) {
+                    return res.status(200).json({ balance: 0 })
+                }
             return res.status(200).json({ balance: userBalance.balance })
         }
 

@@ -20,7 +20,7 @@ export default async function handler (
             if (restaurantsError) throw new Error ('Error fetching restaurants' )
 
             if (!restaurants || restaurants.length === 0) {
-                return res.status(404).json({ error: 'No restaurants found' })
+                return res.status(200).json({ message: 'No restaurants found' })
             }
 
         return res.status(200).json(restaurants)

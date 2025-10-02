@@ -29,6 +29,7 @@ export default async function handler (
             .eq('checkout_id', checkoutId)
             
             if (error) throw new Error ('Error fetching checkout items')
+                
         return res.status(200).json(data)
 
     } catch (error: any) {
