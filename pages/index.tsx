@@ -3,6 +3,8 @@ import RestaurantFeed from "@/components/restaurants/RestaurantFeed";
 
 export default function MainMenu() {
     return (
-        <RestaurantFeed />
+        <div>
+            <RestaurantFeed />
+        </div>
     )
 }
