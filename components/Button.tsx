@@ -4,7 +4,7 @@ interface ButtonProps {
     primary: string;
     secondary?: boolean;
     disabled?: boolean;
-    large?: boolean;
+    small?: boolean;
     onClick: () => void
 }
 
@@ -29,6 +29,7 @@ const Button: React.FC<ButtonProps> = ({
                 rounded-full
                 ${primary ? 'bg-purple-500 text-white border-purple-500' : ''}
                 ${secondary ? 'bg-white text-purple-500 border-purple-500' : ''}
+                ${small ? 'w-6 h-6 px-0 py-0 rounded-md': 'min-w-[216px] h-11 px-6 rounded-full'}
             `}
         >
             {label}
