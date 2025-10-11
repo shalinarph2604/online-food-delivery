@@ -5,7 +5,7 @@ import SearchBar from './SearchBar'
 
 const Navbar = () => {
     const router = useRouter()
-    const showSearchBar = router.pathname === '/restaurant'
+    const showSearchBar = router.pathname === '/'
 
     const handleNavigate = useCallback((path: string) => {
         router.push(path)
@@ -19,19 +19,18 @@ const Navbar = () => {
     return (
         <nav className="
             fixed
-            bottom-4
             left-1/2
             transform
             -translate-x-1/2
-            bg-purple-500
+            bg-purple-900
             text-white
             backdrop-blur-md
             shadow-md
-            rounded-full
-            border border-purple-300
-            w-full max-w-6xl
+            border border-purple-900
+            w-full
             mx-auto
             z-50
+            gap-10
             flex
             items-center
             justify-between

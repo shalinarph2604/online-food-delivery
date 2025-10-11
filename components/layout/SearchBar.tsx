@@ -13,15 +13,15 @@ const SearchBar = () => {
     }
 
     return (
-        <form onSubmit={handleSearch} className="flex items-center">
+        <form onSubmit={handleSearch} className="flex items-center relative gap-4">
             <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search for restaurant..."
                 className="
-                    w-full
                     rounded-lg
+                    w-full
                     border
                     border-purple-300
                     bg-white
@@ -37,12 +37,11 @@ const SearchBar = () => {
                     "
             />
             <button type="submit" aria-label="search-restaurant" className="
-                absolute
-                right-3
-                top-1/2
+                relative
+                top-3
                 -translate-y-1/2
-                text-purple-500 hover:text-purple-600 transition">
-                <Search size={18} />
+                text-white hover:text-purple-600 transition">
+                <Search size={24} />
             </button>
         </form>
     )
