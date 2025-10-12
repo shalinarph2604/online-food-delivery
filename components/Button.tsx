@@ -1,7 +1,7 @@
 // ambil dari ui/button.tsx
 interface ButtonProps {
     label: string;
-    primary: string;
+    primary?: boolean;
     secondary?: boolean;
     disabled?: boolean;
     small?: boolean;
@@ -27,8 +27,8 @@ const Button: React.FC<ButtonProps> = ({
                 transition
                 border-2
                 rounded-full
-                ${primary ? 'bg-purple-500 text-white border-purple-500' : ''}
-                ${secondary ? 'bg-white text-purple-500 border-purple-500' : ''}
+                ${primary ? 'bg-purple-900 text-white border-purple-900' : ''}
+                ${secondary ? 'bg-white text-purple-500 border-purple-900' : ''}
                 ${small ? 'w-6 h-6 px-0 py-0 rounded-md': 'min-w-[216px] h-11 px-6 rounded-full'}
             `}
         >
