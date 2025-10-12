@@ -3,7 +3,11 @@ import { useCallback } from 'react'
 import { FaHome, FaShoppingCart, FaBox, FaUser, FaSignOutAlt } from 'react-icons/fa'
 import SearchBar from './SearchBar'
 
-const Navbar = () => {
+interface NavbarProps {
+    onSearch?: (query: string) => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
     const router = useRouter()
     const showSearchBar = router.pathname === '/'
 
@@ -50,7 +54,7 @@ const Navbar = () => {
 
             {/*The middle side (search bar) */}
             <div className="flex-1 mx-4 hidden md:block">
-                {showSearchBar && <SearchBar />}
+                {showSearchBar && <SearchBar onSearch={onSearch} />}
             </div>
 
             {/*The right side */}

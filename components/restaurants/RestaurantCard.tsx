@@ -47,19 +47,16 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
     // half star
         if (hasHalfStar) {
             stars.push(
-                <svg
-                    key="half" 
-                    className="w-5 h-5"
-                    viewBox="0 0 20 20"
-                >
-                    <defs>
-                        <linearGradient id={`half-${id}`}>
-                            <stop offset="50%" stopColor="#fb923c" />
-                            <stop offset="50%" stopColor="#d1d5db" />
-                        </linearGradient>
-                        <path fill={`url(#half-${id})`} d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </defs>
-                </svg>
+                <div key="half" className="relative w-5 h-5">
+                    {/* Background: bintang abu-abu */}
+                    <svg className="absolute w-5 h-5 fill-gray-300" viewBox="0 0 20 20">
+                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                    </svg>
+                    {/* Foreground: setengah bintang orange (dipotong) */}
+                    <svg className="absolute w-5 h-5" viewBox="0 0 20 20" style={{ clipPath: 'inset(0 50% 0 0)' }}>
+                        <path className="fill-orange-400" d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                    </svg>
+                </div>
             )
         }
 

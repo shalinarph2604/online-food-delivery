@@ -2,12 +2,18 @@
 import Layout from "@/components/Layout";
 import RestaurantFeed from "@/components/restaurants/RestaurantFeed";
 
-export default function MainMenu() {
+import { useState } from "react";
+
+export default function HomePage() {
+
+    const [search, setSearch] = useState('')
+
+    const handleSearch = (query: string) => {
+        setSearch(query)
+    }
     return (
-        <Layout>
-            <div>
-                <RestaurantFeed />
-            </div>
+        <Layout onSearch={handleSearch}>
+            <RestaurantFeed search={search} />
         </Layout>
     )
 }
