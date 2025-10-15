@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import useCurrentUser from '@/hooks/useCurrentUser'
 
-import { FaHome, FaShoppingCart, FaBox, FaUser, FaSignOutAlt } from 'react-icons/fa'
+import { FaHome, FaShoppingCart, FaBox, FaUser, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa'
 import SearchBar from './SearchBar'
 import LoginModal from '../modals/LoginModal'
 
@@ -13,7 +13,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
     const router = useRouter()
     const showSearchBar = router.pathname === '/'
-    const currentUser = useCurrentUser()
+    const { user } = useCurrentUser()
 
     const handleNavigate = useCallback((path: string) => {
         router.push(path)
@@ -62,14 +62,22 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
             </div>
 
             {/*The right side */}
-            <div className="flex items-center gap-4">
-                <button onClick={() => handleNavigate('/profile')} aria-label='Profile'>
-                    <FaUser className="text-white text-xl hover:scale-110 transition"/>
-                </button>
-                <button onClick={() => handleLogout()} aria-label='Logout'>
-                    <FaSignOutAlt className="text-white text-xl hover:scale-110 transition"/>
-                </button>
-            </div>
+            {user ? (
+                <div>
+                    <button onClick={LoginModal} aria-label="Login">
+                        <FaSignInAlt className="text-white text-xl hover:scale-110 transition" />
+                    </button>
+                </div>
+            ) : (
+                <div className="flex items-center gap-4">
+                    <button onClick={() => handleNavigate('/profile')} aria-label='Profile'>
+                        <FaUser className="text-white text-xl hover:scale-110 transition"/>
+                    </button>
+                    <button onClick={() => handleLogout()} aria-label='Logout'>
+                        <FaSignOutAlt className="text-white text-xl hover:scale-110 transition"/>
+                    </button> 
+                </div>
+            )}  
         </nav>
     )
 }
