@@ -1,7 +1,10 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
+import useCurrentUser from '@/hooks/useCurrentUser'
+
 import { FaHome, FaShoppingCart, FaBox, FaUser, FaSignOutAlt } from 'react-icons/fa'
 import SearchBar from './SearchBar'
+import LoginModal from '../modals/LoginModal'
 
 interface NavbarProps {
     onSearch?: (query: string) => void;
@@ -10,6 +13,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
     const router = useRouter()
     const showSearchBar = router.pathname === '/'
+    const currentUser = useCurrentUser()
 
     const handleNavigate = useCallback((path: string) => {
         router.push(path)
