@@ -37,7 +37,7 @@ export default async function handler(
                 if (quantity !== undefined) updateItem.quantity = quantity
                 if (notes !== undefined) updateItem.notes = notes
 
-            const { data: updatedCart, error: updatedError }= await supabase 
+            const { data: updatedCart, error: updatedError } = await supabase 
                 .from('cart')
                 .update(updateItem)
                 .eq('dish_id', dishId)

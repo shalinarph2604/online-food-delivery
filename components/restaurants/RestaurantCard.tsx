@@ -1,14 +1,14 @@
 import React, { useCallback } from "react"
-import { useRouter } from "next/router";
-import Image from "next/image";
+import { useRouter } from "next/router"
+import Image from "next/image"
 
 interface RestaurantCardProps {
-    id: string;
-    name: string;
-    address: string;
-    category: string;
-    rating: number;
-    imageUrl: string;
+    id: string
+    name: string
+    address: string
+    category: string
+    rating: number
+    imageUrl: string
 }
 
 const RestaurantCard: React.FC<RestaurantCardProps> = ({ 
