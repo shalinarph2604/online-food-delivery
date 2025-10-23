@@ -20,9 +20,9 @@ export default async function handler(
             return res.status(401).json({ message: 'User not authenticated' })
         }
 
-        const { dishId, restaurantId } = req.query
+        const { itemId, restaurantId } = req.query
 
-        if (!dishId || typeof dishId !== 'string' || !restaurantId || typeof restaurantId !== 'string') {
+        if (!itemId || typeof itemId !== 'string' || !restaurantId || typeof restaurantId !== 'string') {
             return res.status(400).json({ message: 'Invalid dish ID or restaurant ID' })
         }
 
@@ -40,7 +40,7 @@ export default async function handler(
             const { data: updatedCart, error: updatedError } = await supabase 
                 .from('cart')
                 .update(updateItem)
-                .eq('dish_id', dishId)
+                .eq('dish_id', itemId)
                 .eq('user_id', currentUser.id)
                 .eq('restaurant_id', restaurantId)
                 .select()
@@ -55,7 +55,7 @@ export default async function handler(
             const { data: deletedCart, error: deletedError } = await supabase
                 .from('cart')
                 .delete()
-                .eq('dish_id', dishId)
+                .eq('dish_id', itemId)
                 .eq('user_id', currentUser.id)
                 .eq('restaurant_id', restaurantId)
                 .select()

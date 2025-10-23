@@ -1,8 +1,8 @@
 import useSWR from 'swr';
 import fetcher from '@/libs/fetcher';
 
-const useDishes = (resaturantId: string) => {
-    const { data, error, isLoading } = useSWR(
+const useDishes = (resaturantId?: string) => {
+    const { data, error, isLoading, mutate } = useSWR(
         resaturantId ? `/api/restaurant/${resaturantId}` : null,
         fetcher
     );
@@ -10,7 +10,8 @@ const useDishes = (resaturantId: string) => {
     return {
         dishes: data,
         isLoading,
-        isError: error
+        isError: error,
+        mutateFetchedDishes: mutate
     }
 }
 

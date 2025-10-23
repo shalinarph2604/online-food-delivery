@@ -1,4 +1,6 @@
 import React, { useCallback, useState } from "react"
+import useDish from "@/hooks/useDish"
+
 import Button from "../Button"
 import Image from "next/image"
 
@@ -24,6 +26,8 @@ const DishesCard: React.FC<DishesCardProps> = ({
 }) => {
     const [isAdding, setIsAdding] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+
+    const dish = useDish({ restaurantId, dishId: id })
 
     const addToCart = useCallback(async () => {
         try {
