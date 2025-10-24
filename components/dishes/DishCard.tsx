@@ -1,95 +1,84 @@
-import React, { useCallback, useState } from "react"
-import useDish from "@/hooks/useDish"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useCallback } from "react"
+
+import useAddDish from "@/hooks/useAddDish"
+import useLoginModal from "@/hooks/useLoginModal"
+import useCurrentUser from "@/hooks/useCurrentUser"
 
 import Button from "../Button"
 import Image from "next/image"
 
-import axios from "axios"
-import toast from "react-hot-toast"
-
 interface DishesCardProps {
-    id: string
-    restaurantId: string
-    name: string
-    price: number
-    quantity: number
-    imageUrl: string
+    data: Record<string, any>
+    restaurantId?: string
 }
 
 const DishesCard: React.FC<DishesCardProps> = ({
-    id,
-    restaurantId,
-    name,
-    price,
-    quantity,
-    imageUrl,
+    data,
+    restaurantId
 }) => {
-    const [isAdding, setIsAdding] = useState(false)
-    const [isDeleting, setIsDeleting] = useState(false)
 
-    const dish = useDish({ restaurantId, dishId: id })
+    const {
+        addButton,
+        subtractButton,
+        existing = [],
+        isProcessing
+    } = useAddDish({ restaurantId, dishId: data.id })
 
-    const addToCart = useCallback(async () => {
-        try {
-            setIsAdding(true)
+    const { user } = useCurrentUser()
 
-            await axios.post('/api/cart', {
-                id,
-                restaurantId,
-                name,
-                price,
-                quantity: quantity + 1,
-                imageUrl
-            })
+    const loginModal = useLoginModal()
 
-            toast.success('Added to cart')
-        } catch (error) {
-            console.log(error)
-            toast.error('Cannot add item to the cart')
-        } finally {
-            setIsAdding(false)
-        }
+    const existingItem = Array.isArray(existing)
+        ? existing.find((it: any) => it.dish_id === data.id) ?? null
+        : existing ?? null
 
-    }, [id, restaurantId, name, price, quantity, imageUrl])
+// disable subtract if quantity = 0 or processing or explicitly disabled
+    const existingQty = existingItem ? Number(existing.quantity ?? 0) : 0
+    const isSubtractDisabled = data.quantity <= 0 || existingQty <= 0 || isProcessing
 
+    const addToCart = useCallback(() => {
 
-    const handleDeleteItem = useCallback(async () => {
-        try {
-            setIsDeleting(true)
+        if (!user) return loginModal.onOpen()
 
-            await axios.delete('/api/cart', {
-                data: {
-                    id,
-                    restaurantId,
-                    name,
-                    price,
-                    quantity: Math.max(0, quantity - 1),
-                    imageUrl
-                }
-            })
+        addButton()
+    }, [addButton, loginModal, user])
 
-            toast.success('Removed from cart')
-        } catch (error) {
-            console.log(error)
-            toast.error('Cannot remove item from the cart')
-        } finally {
-            setIsDeleting(false)
-        }
-    }, [id, restaurantId, name, price, quantity, imageUrl])
+    const deleteFromCart = useCallback(() => {
+        if (isSubtractDisabled) return
+
+        if (!user) return loginModal.onOpen()
+
+        subtractButton()
+    }, [subtractButton, loginModal, user, isSubtractDisabled])
+
 
     return (
-        <div>
-            <div>
-                <Image src={imageUrl} alt={name} />
+        <div className="bg-white rounded-lg shadow-md hover:shadow-xl cursor-pointer overflow-hidden">
+            <div className="relative h-48 w-full">
+                <Image src={data.imageUrl} alt={data.name} fill/>
             </div>
-            <h2>{name}</h2>
-            <p>{price}</p>
-            <div>
-                <Button 
-                    onClick={handleDeleteItem}
-                    label="-"
-                    
-                />
+            <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2">
+                    <h2 className="text-xl font-bold mb-2 truncate">{data.name}</h2>
+                    <p className="text-purple-900 text-lg truncate">{data.price}</p>
+                </div>
+                <div className="items-center gap-0.5">
+                    <Button
+                        onClick={deleteFromCart} 
+                        disabled={isSubtractDisabled}
+                        label="-"
+                        small
+                        secondary
+                    />
+                    <span className="text-sm font-normal">{existingQty}</span>
+                    <Button 
+                        onClick={addToCart}
+                        label="+"
+                        small
+                        secondary
+                    />
+                </div>
             </div>
         </div>
     )

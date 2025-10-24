@@ -3,18 +3,21 @@ import useSWR from 'swr'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
-import { useCallback } from 'react'
+import fetcher from '@/libs/fetcher'
 
+import { useCallback, useState } from 'react'
 import useDish from './useDish'
 import useDishes from './useDishes'
 import useCurrentUser from './useCurrentUser'
 import useLoginModal from './useLoginModal'
-import fetcher from '@/libs/fetcher'
+
 
 const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?: string}) => {
     const { user } = useCurrentUser()
     const { mutateFetchedDish } = useDish({ restaurantId, dishId })
     const { mutateFetchedDishes } = useDishes(restaurantId)
+
+    const [isProcessing, setIsProcessing] = useState(false)
 
     const loginModal = useLoginModal()
 
@@ -23,13 +26,15 @@ const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?:
         fetcher
     )
 
+// checking if the specific dish is already in the cart or not
+    const existing = (filledCart || []).find((it: any) => it.dish_id === dishId)
+
     const addButton = useCallback(async () => {
         if (!user) return loginModal.onOpen()
         if (!restaurantId || !dishId) return toast.error('Invalid item')
 
         try {
-        // checking if the specific dish is already in the cart or not
-            const existing = (filledCart || []).find((it: any) => it.dish_id === dishId)
+            setIsProcessing(true)  
 
             if (existing) {
                 const itemId = existing.id
@@ -51,16 +56,19 @@ const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?:
         } catch (error) {
             console.log(error)
             toast.error("Cannot add item to the cart")
+        } finally {
+            setIsProcessing(false)
         }
 
-    }, [user, restaurantId, dishId, filledCart, loginModal, mutateCart, mutateFetchedDish, mutateFetchedDishes])
+    }, [user, restaurantId, dishId, loginModal, mutateCart, mutateFetchedDish, mutateFetchedDishes, existing])
 
     const subtractButton = useCallback(async () => {
+
         if (!user) return loginModal.onOpen()
         if (!restaurantId || !dishId) return toast.error('Invalid item')
 
         try {
-            const existing = (filledCart || []).find((item: any) => item.dish_id === dishId)
+            setIsProcessing(true)
 
             if (!existing) {
                 return toast.error('Item not in cart')
@@ -85,12 +93,17 @@ const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?:
         } catch (error) {
             console.log(error)
             toast.error("Cannot remove item from the cart")
+        } finally {
+            setIsProcessing(false)
         }
-    }, [dishId, filledCart, loginModal, restaurantId, user, mutateCart, mutateFetchedDish, mutateFetchedDishes])
+    }, [dishId, existing, loginModal, restaurantId, user, mutateCart, mutateFetchedDish, mutateFetchedDishes])
 
     return {
         addButton,
-        subtractButton
+        subtractButton,
+        isProcessing,
+        mutateCart,
+        existing
     }
 }
 

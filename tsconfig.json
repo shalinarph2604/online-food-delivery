@@ -17,6 +17,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/restaurant/[restaurantId]", "pages/restaurant/[restaurantId].tsx.backup"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/restaurant/[restaurantId]", "pages/restaurant/[restaurantId].tsx"],
   "exclude": ["node_modules"]
 }

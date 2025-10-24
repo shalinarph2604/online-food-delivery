@@ -1,10 +1,11 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import useCurrentUser from '@/hooks/useCurrentUser'
+import useRegisterModal from '@/hooks/useRegisterModal'
 
 import { FaHome, FaShoppingCart, FaBox, FaUser, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa'
 import SearchBar from './SearchBar'
-import LoginModal from '../modals/LoginModal'
+import RegisterModal from '../modals/RegisterModal'
 
 interface NavbarProps {
     onSearch?: (query: string) => void;
@@ -12,6 +13,8 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
     const router = useRouter()
+    const registerModal = useRegisterModal()
+
     const showSearchBar = router.pathname === '/'
     const { user } = useCurrentUser()
 
@@ -19,10 +22,11 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
         router.push(path)
     }, [router])
 
-    const handleLogout = useCallback(() => {
-        localStorage.removeItem('token')
-        router.push('/login')
-    }, [router])
+    const handleLogout = useCallback(async() => {
+        await localStorage.removeItem('token')
+        
+        registerModal.onOpen()
+    }, [registerModal])
 
     return (
         <nav className="
@@ -45,7 +49,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
             px-6 py-3">
             {/*The left side */}
             <div className="flex items-center gap-4">
-                <button onClick={() => handleNavigate('/restaurant')} aria-label='Home'>
+                <button onClick={() => handleNavigate('/')} aria-label='Home'>
                     <FaHome className="text-white text-xl hover:scale-110 transition"/>
                 </button>
                 <button onClick={() => handleNavigate('/cart')} aria-label='Cart'>
@@ -64,7 +68,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
             {/*The right side */}
             {user ? (
                 <div>
-                    <button onClick={LoginModal} aria-label="Login">
+                    <button onClick={RegisterModal} aria-label="Login">
                         <FaSignInAlt className="text-white text-xl hover:scale-110 transition" />
                     </button>
                 </div>

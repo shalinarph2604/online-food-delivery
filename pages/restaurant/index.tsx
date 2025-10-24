@@ -11,6 +11,7 @@ export default function HomePage() {
     const handleSearch = (query: string) => {
         setSearch(query)
     }
+    
     return (
         <Layout onSearch={handleSearch}>
             <RestaurantFeed search={search} />
