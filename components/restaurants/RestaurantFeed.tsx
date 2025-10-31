@@ -51,7 +51,7 @@ const RestaurantFeed: React.FC<RestaurantFeedProps> = ({ search }) => {
                             key={restaurant.id}
                             id={restaurant.id}
                             name={restaurant.name}
-                            imageUrl={restaurant.image_url}
+                            image_url={restaurant.image_url}
                             address={restaurant.address}
                             category={restaurant.category}
                             rating={restaurant.rating}

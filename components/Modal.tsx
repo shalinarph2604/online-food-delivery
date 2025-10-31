@@ -63,32 +63,32 @@ const Modal: React.FC<ModalProps> = ({
     }
 
     return (
-       <>
+        <>
             <div 
                 className="
-                    relative
-                    w-full
-                    max-w-md
-                    bg-white
-                    rounded-2xl
-                    shadow-2xl
-                    mx-auto
-                    animate-slideUp
+                    fixed
+                    inset-0
+                    z-[100]
+                    flex
+                    items-center
+                    justify-center
+                    bg-black/50
+                    px-4
                 "
-                onClick={handleClose} 
+                onClick={handleClose}
             >
-                <div 
+                <div
                     className="
-                        flex
-                        items-center
-                        justify-between
-                        p-6
-                        border-b
-                        border-gray-200
+                        relative
+                        w-full
+                        max-w-md
+                        bg-white
+                        rounded-2xl
+                        shadow-2xl
+                        animate-slideUp
                     "
                     onClick={(e) => e.stopPropagation()}
                 >
-
                     {/* HEADER */}
                     <div className="
                         flex
@@ -112,7 +112,7 @@ const Modal: React.FC<ModalProps> = ({
                                 disabled:opacity-50"
                             aria-label="Close Modal"
                         >
-                            <AiOutlineClose size={20} onClick={handleClose} />
+                            <AiOutlineClose size={20} />
                         </button>
                     </div>
 
@@ -137,7 +137,7 @@ const Modal: React.FC<ModalProps> = ({
                     </div>
                 </div>
             </div>
-       </> 
+        </>
     )
 }
 

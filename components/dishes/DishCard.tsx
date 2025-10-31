@@ -2,20 +2,29 @@
 import React, { useCallback } from "react"
 
 import useAddDish from "@/hooks/useAddDish"
+import useDish from "@/hooks/useDish"
 import useLoginModal from "@/hooks/useLoginModal"
 import useCurrentUser from "@/hooks/useCurrentUser"
 
 import Button from "../Button"
 import Image from "next/image"
 
-interface DishesCardProps {
-    data: Record<string, any>
-    restaurantId?: string
+interface DishCardItem {
+    id: string
+    restaurant_id: string
+    name: string
+    price: number
+    image_url: string
 }
 
-const DishesCard: React.FC<DishesCardProps> = ({
-    data,
-    restaurantId
+interface DishCardProps {
+    restaurantId?: string
+    dishId?: string
+    quantity?: number
+}
+
+const DishCard: React.FC<DishCardProps> = ({
+    restaurantId, dishId, quantity
 }) => {
 
     const {
@@ -23,19 +32,21 @@ const DishesCard: React.FC<DishesCardProps> = ({
         subtractButton,
         existing = [],
         isProcessing
-    } = useAddDish({ restaurantId, dishId: data.id })
+    } = useAddDish({ restaurantId, dishId })
+
+    const { dish } = useDish({ restaurantId, dishId })
 
     const { user } = useCurrentUser()
 
     const loginModal = useLoginModal()
 
     const existingItem = Array.isArray(existing)
-        ? existing.find((it: any) => it.dish_id === data.id) ?? null
+        ? existing.find((it: any) => it.dish_id === dishId) ?? null
         : existing ?? null
 
 // disable subtract if quantity = 0 or processing or explicitly disabled
     const existingQty = existingItem ? Number(existing.quantity ?? 0) : 0
-    const isSubtractDisabled = data.quantity <= 0 || existingQty <= 0 || isProcessing
+    const isSubtractDisabled = Number(quantity) <= 0 || existingQty <= 0 || isProcessing
 
     const addToCart = useCallback(() => {
 
@@ -56,12 +67,16 @@ const DishesCard: React.FC<DishesCardProps> = ({
     return (
         <div className="bg-white rounded-lg shadow-md hover:shadow-xl cursor-pointer overflow-hidden">
             <div className="relative h-48 w-full">
-                <Image src={data.imageUrl} alt={data.name} fill/>
+                {dish?.image_url ? (
+                    <Image src={dish.image_url} alt={dish.name ?? "Dish"} fill/>
+                ) : (
+                    <div className="h-full w-full bg-gray-100" />
+                )}
             </div>
             <div className="grid grid-cols-3 gap-2">
                 <div className="col-span-2">
-                    <h2 className="text-xl font-bold mb-2 truncate">{data.name}</h2>
-                    <p className="text-purple-900 text-lg truncate">{data.price}</p>
+                    <h2 className="text-xl font-bold mb-2 truncate">{dish?.name}</h2>
+                    <p className="text-purple-900 text-lg truncate">{dish?.price}</p>
                 </div>
                 <div className="items-center gap-0.5">
                     <Button
@@ -84,4 +99,4 @@ const DishesCard: React.FC<DishesCardProps> = ({
     )
 }
 
-export default DishesCard
+export default DishCard

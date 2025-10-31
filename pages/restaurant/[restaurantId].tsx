@@ -2,16 +2,23 @@
 // the UI of restaurant details, including the menu and reviews
 import DishesFeed from "@/components/dishes/DishesFeed";
 import Layout from "@/components/Layout";
+import CartButton from "@/components/restaurants/CartButton";
 
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use, useCallback, useMemo } from "react";
+import useCartModal from "@/hooks/useCartModal";
 import axios from "axios";
 
 const RestaurantView = () => {
     const router = useRouter()
     const { restaurantId } = router.query
+    const cartModal = useCartModal()
 
     const [data, setData] = useState<Record<string, any> | null>(null)
+
+    const openCartModal = useCallback(() => {
+        cartModal.onOpen()
+    }, [cartModal])
 
     useEffect(() => {
         if (restaurantId) {
@@ -25,9 +32,10 @@ const RestaurantView = () => {
     return (
         <Layout>
             <DishesFeed
-                data={data}
                 restaurantId={restaurantId as string} 
+                dishId={data.dishId}
             />
+            <CartButton restaurantId={restaurantId as string} />
         </Layout>
     )
 }

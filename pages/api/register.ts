@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";
 
-import supabase from "@/libs/supabase";
+import getSupabaseAdmin from "@/libs/supabaseAdmin";
 
 export default async function handler(
     req: NextApiRequest,
@@ -12,35 +12,44 @@ export default async function handler(
     }
 
     try {
+        // Ensure envs exist and create admin client lazily
+        const supabaseAdmin = getSupabaseAdmin()
         const { email, username, name, password } = req.body
         const hashedpassword = await bcrypt.hash(password, 8)
 
         // Check if this email is already registered
-        const { data: existingUser } = await supabase
+        const { data: existingUser, error: existingError } = await supabaseAdmin
             .from('users')
             .select('*')
             .eq('email', email)
             .maybeSingle();
+
+        if (existingError) {
+            return res.status(400).json({ error: existingError.message })
+        }
 
             if (existingUser) {
                 return res.status(400).json({ error: 'Email already registered' })
             }
 
         // Insert new user into the database
-        const user = await supabase
+        const { data: createdUser, error: insertError } = await supabaseAdmin
             .from('users')
             .insert([
                 {
                     email,
                     username,
                     name,
-                    password: hashedpassword,
+                    hashedpassword,
                 }
             ])
             .select()
             .single();
 
-        return res.status(201).json(user);
+        if (insertError) {
+            return res.status(400).json({ error: insertError.message })
+        }
+        return res.status(201).json(createdUser);
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Internal server error' });

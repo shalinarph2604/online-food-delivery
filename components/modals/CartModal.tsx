@@ -16,7 +16,7 @@ interface CartItem {
     dish_id: string
     quantity: number
     notes?: string
-    created_at: string
+    created_at?: string
     dish?: {
         name: string
         price: number

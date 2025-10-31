@@ -2,22 +2,22 @@ import React, { useCallback } from "react"
 import { useRouter } from "next/router"
 import Image from "next/image"
 
-interface RestaurantCardProps {
+interface RestaurantCardItem {
     id: string
     name: string
     address: string
     category: string
     rating: number
-    imageUrl: string
+    image_url: string
 }
 
-const RestaurantCard: React.FC<RestaurantCardProps> = ({ 
+const RestaurantCard: React.FC<RestaurantCardItem> = ({ 
     id,
     name,
     address,
     category,
     rating,
-    imageUrl
+    image_url
 }) => {
     const router = useRouter();
 
@@ -83,7 +83,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
             {/* Image */}
             <div className="relative h-48 w-full">
                 <Image
-                    src={imageUrl}
+                    src={image_url}
                     alt={name}
                     fill
                 />

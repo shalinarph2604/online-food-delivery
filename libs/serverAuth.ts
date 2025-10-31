@@ -12,7 +12,7 @@ const serverAuth = async (
     const session = await getServerSession(req, res, authOptions) as Session
 
     if (!session?.user?.email) {
-        throw new Error('Not signed in')
+        return { currentUser: null, session: null as unknown as Session }
     }
     
     const currentUser = await supabase
@@ -22,7 +22,7 @@ const serverAuth = async (
         .single()
 
     if (!currentUser.data) {
-        throw new Error('Not signed in')
+        return { currentUser: null, session }
     }
 
     return { currentUser: currentUser.data, session }
