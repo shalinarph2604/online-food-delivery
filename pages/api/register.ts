@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";
 
@@ -12,9 +13,19 @@ export default async function handler(
     }
 
     try {
+        // Validate input
+        const { email, username, name, password } = req.body
+        
+        if (!email || !username || !name || !password) {
+            return res.status(400).json({ error: 'All fields are required' })
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' })
+        }
+
         // Ensure envs exist and create admin client lazily
         const supabaseAdmin = getSupabaseAdmin()
-        const { email, username, name, password } = req.body
         const hashedpassword = await bcrypt.hash(password, 8)
 
         // Check if this email is already registered
@@ -50,9 +61,10 @@ export default async function handler(
             return res.status(400).json({ error: insertError.message })
         }
         return res.status(201).json(createdUser);
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ error: 'Internal server error' });
+    } catch (error: any) {
+        console.error('Register API Error:', error?.stack ?? error);
+        const errorMessage = error?.message || 'Internal server error';
+        return res.status(500).json({ error: errorMessage });
     }
     
 }

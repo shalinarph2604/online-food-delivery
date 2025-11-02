@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ini simple aja, dialog sama input aja, sama button paling
 import Modal from "../Modal";
 import Input from "../Input";
+import { toast } from "react-hot-toast";
 
 import useLoginModal from "@/hooks/useLoginModal";
 import useRegisterModal from "@/hooks/useRegisterModal";
@@ -30,13 +32,23 @@ const LoginModal = () => {
         try {
             setIsLoading(true)
 
-            await signIn('credentials', {
+            const res =await signIn('credentials', {
                 email,
                 password,
                 redirect: false,
             })
 
-            loginModal.onClose()
+            console.log('signIn result', res)
+
+            if (res && (res as any).ok) {
+                loginModal.onClose()
+                setEmail('')
+                setPassword('')
+            } else {
+                const message = (res as any)?.error || 'Invalid credentials'
+                toast.error(message)
+            }
+
         } catch (error) {
             console.log(error)
         }

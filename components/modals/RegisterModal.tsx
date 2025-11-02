@@ -19,6 +19,7 @@ const RegisterModal = () => {
     const [password, setPassword] = useState('')
 
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
 
     const onToggle = useCallback(() => {
         if (isLoading) {
@@ -32,6 +33,7 @@ const RegisterModal = () => {
     const onSubmit = useCallback(async () => {
         try {
             setIsLoading(true)
+            setError('')
 
             await axios.post('/api/register', {
                 email,
@@ -47,16 +49,22 @@ const RegisterModal = () => {
 
             registerModal.onClose()
 
-        } catch (error) {
+        } catch (error: any) {
             console.log(error)
-
+            const errorMessage = error?.response?.data?.error || error?.message || 'Failed to register. Please try again.'
+            setError(errorMessage)
         } finally {
             setIsLoading(false)
         }
     }, [registerModal, email, username, name, password])
 
     const bodyContent = (
-        <div>
+        <div className="space-y-4">
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {error}
+                </div>
+            )}
             <Input 
                 placeholder="Name"
                 onChange={(e) => setName(e.target.value)}

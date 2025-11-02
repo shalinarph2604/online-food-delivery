@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 import useCurrentUser from '@/hooks/useCurrentUser'
-import useRegisterModal from '@/hooks/useRegisterModal'
 import useLoginModal from '@/hooks/useLoginModal'
 
 import { FaHome, FaShoppingCart, FaBox, FaUser, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa'
@@ -13,7 +12,6 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
     const router = useRouter()
-    const registerModal = useRegisterModal()
     const loginModal = useLoginModal()
 
     const showSearchBar = router.pathname === '/'
@@ -81,9 +79,6 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
                     <div className="flex items-center gap-4">
                         <button onClick={loginModal.onOpen} aria-label="Login">
                             <FaSignInAlt className="text-white text-xl hover:scale-110 transition" />
-                        </button>
-                        <button onClick={registerModal.onOpen} aria-label="Register">
-                            <FaUser className="text-white text-xl hover:scale-110 transition" />
                         </button>
                     </div>
                 )}  
