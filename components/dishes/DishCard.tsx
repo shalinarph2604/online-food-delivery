@@ -20,11 +20,12 @@ interface DishCardItem {
 interface DishCardProps {
     restaurantId?: string
     dishId?: string
+    dish?: DishCardItem
     quantity?: number
 }
 
 const DishCard: React.FC<DishCardProps> = ({
-    restaurantId, dishId, quantity
+    restaurantId, dishId, dish: dishInfo, quantity
 }) => {
 
     const {
@@ -34,7 +35,9 @@ const DishCard: React.FC<DishCardProps> = ({
         isProcessing
     } = useAddDish({ restaurantId, dishId })
 
-    const { dish } = useDish({ restaurantId, dishId })
+    const { dish: fetchedDish } = useDish({ restaurantId, dishId })
+
+    const displayDish = dishInfo ?? fetchedDish ?? null
 
     const { user } = useCurrentUser()
 
@@ -67,16 +70,16 @@ const DishCard: React.FC<DishCardProps> = ({
     return (
         <div className="bg-white rounded-lg shadow-md hover:shadow-xl cursor-pointer overflow-hidden">
             <div className="relative h-48 w-full">
-                {dish?.image_url ? (
-                    <Image src={dish.image_url} alt={dish.name ?? "Dish"} fill/>
+                {displayDish?.image_url ? (
+                    <Image src={displayDish.image_url} alt={displayDish.name ?? "Dish"} fill/>
                 ) : (
                     <div className="h-full w-full bg-gray-100" />
                 )}
             </div>
             <div className="grid grid-cols-3 gap-2">
                 <div className="col-span-2">
-                    <h2 className="text-xl font-bold mb-2 truncate">{dish?.name}</h2>
-                    <p className="text-purple-900 text-lg truncate">{dish?.price}</p>
+                    <h2 className="text-xl font-bold mb-2 truncate">{displayDish?.name}</h2>
+                    <p className="text-purple-900 text-lg truncate">{displayDish?.price}</p>
                 </div>
                 <div className="items-center gap-0.5">
                     <Button

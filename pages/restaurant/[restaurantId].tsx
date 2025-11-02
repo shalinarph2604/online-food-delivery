@@ -2,10 +2,10 @@
 // the UI of restaurant details, including the menu and reviews
 import DishesFeed from "@/components/dishes/DishesFeed";
 import Layout from "@/components/Layout";
-import CartButton from "@/components/restaurants/CartButton";
+import CartButton from "@/components/dishes/CartButton";
 
 import { useRouter } from "next/router";
-import { useState, useEffect, use, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import useCartModal from "@/hooks/useCartModal";
 import axios from "axios";
 
@@ -35,7 +35,12 @@ const RestaurantView = () => {
                 restaurantId={restaurantId as string} 
                 dishId={data.dishId}
             />
-            <CartButton restaurantId={restaurantId as string} />
+            <div className="fixed bottom-6 self-center">
+                <CartButton 
+                    restaurantId={restaurantId as string}
+
+                />
+            </div>
         </Layout>
     )
 }

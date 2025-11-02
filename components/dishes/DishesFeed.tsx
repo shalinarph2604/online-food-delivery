@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import useDishes from "@/hooks/useDishes";
-import useRestaurants from "@/hooks/useRestaurants";
 import DishCard from "./DishCard";
 
 interface DishFeedProps {
     restaurantId?: string
     dishId?: string
+    quantity?: number
 }
 
-const DishesFeed: React.FC<DishFeedProps> = ({ restaurantId, dishId }) => {
+const DishesFeed: React.FC<DishFeedProps> = ({ restaurantId, dishId, quantity }) => {
     const { dishes = [] } = useDishes()
 
     return (
@@ -18,7 +18,10 @@ const DishesFeed: React.FC<DishFeedProps> = ({ restaurantId, dishId }) => {
                     <DishCard
                         key={dish.id} 
                         restaurantId={restaurantId}
-                        dishId={dishId}
+                        dishId={typeof dishId === 'string' && dishId.trim() !== '' 
+                                ? dishId : dish.id}
+                        dish={dish as any}
+                        quantity={quantity ?? dish.quantity ?? 0}
                     />
                 ))}
             </div>

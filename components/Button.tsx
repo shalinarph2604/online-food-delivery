@@ -23,7 +23,8 @@ const Button: React.FC<ButtonProps> = ({
             className={`
                 disabled:opacity-70
                 disabled:cursor-not-allowed
-                hover: opacity-80
+                hover:opacity-80
+                cursor-pointer
                 transition
                 border-2
                 rounded-full
