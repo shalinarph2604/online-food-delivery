@@ -1,5 +1,7 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
+import { signOut } from 'next-auth/react'
+import { mutate as globalMutate } from 'swr'
 import useCurrentUser from '@/hooks/useCurrentUser'
 import useLoginModal from '@/hooks/useLoginModal'
 
@@ -12,6 +14,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
     const router = useRouter()
+    const { mutate: mutateCurrentUser } = useCurrentUser()
     const loginModal = useLoginModal()
 
     const showSearchBar = router.pathname === '/'
@@ -21,11 +24,21 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
         router.push(path)
     }, [router])
 
-    const handleLogout = useCallback(async() => {
-        await localStorage.removeItem('token')
-        router.push('/')
-        window.location.reload()
-    }, [router])
+    const handleLogout = useCallback(async () => {
+       try {
+            await signOut({ redirect: false })
+            localStorage.removeItem('token')
+            if (mutateCurrentUser) {
+                await mutateCurrentUser()
+            } else {
+                await globalMutate('/api/users/me')
+            }
+
+            router.push('/')
+        } catch (error) {
+            console.log('Logout failed', error)
+        }
+    }, [router, mutateCurrentUser])
 
     return (
         <>
