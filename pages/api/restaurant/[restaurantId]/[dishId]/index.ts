@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextApiRequest, NextApiResponse } from "next";
-import supabase from "@/libs/supabase";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL || '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
 
 export default async function handler(
     req: NextApiRequest,
@@ -17,13 +22,13 @@ export default async function handler(
             return res.status(400).json({ error: 'Invalid restaurant ID' })
         }
 
-        const dishQuery = supabase
+        const dishQuery = supabaseAdmin
             .from('dishes')
             .select('*')
             .eq('id', dishId)
 
         if (restaurantId && typeof restaurantId === 'string') {
-            dishQuery.eq('restaurantId', restaurantId)
+            dishQuery.eq('restaurant_id', restaurantId)
         }
 
         const { data: dish, error: errorDish } = await dishQuery.single()

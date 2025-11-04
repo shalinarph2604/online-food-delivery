@@ -9,7 +9,7 @@ interface DishFeedProps {
 }
 
 const DishesFeed: React.FC<DishFeedProps> = ({ restaurantId, dishId, quantity }) => {
-    const { dishes = [] } = useDishes()
+    const { dishes = [] } = useDishes(restaurantId)
 
     return (
         <div className="pt-36 px-4 pb-6">

@@ -1,44 +1,54 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // the UI of restaurant details, including the menu and reviews
 import DishesFeed from "@/components/dishes/DishesFeed";
 import Layout from "@/components/Layout";
 import CartButton from "@/components/dishes/CartButton";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import useCartModal from "@/hooks/useCartModal";
-import axios from "axios";
+import { ClipLoader } from "react-spinners";
 
 const RestaurantView = () => {
     const router = useRouter()
-    const { restaurantId } = router.query
-    const cartModal = useCartModal()
-
-    const [data, setData] = useState<Record<string, any> | null>(null)
-
-    const openCartModal = useCallback(() => {
-        cartModal.onOpen()
-    }, [cartModal])
+    const [isPageReady, setIsPageReady] = useState(false)
 
     useEffect(() => {
-        if (restaurantId) {
-            axios.get(`/api/restaurant/${restaurantId}`)
-            .then(setData)
+        if (router.isReady) {
+            setIsPageReady(true)
         }
-    }, [restaurantId])
+    }, [router.isReady])
 
-    if (!data) return <p>Loading...</p>
+    if (!isPageReady) {
+        return (
+            <Layout>
+                <div className="flex justify-center items-center h-screen">
+                    <ClipLoader size={50} color={"#F97316"} />
+                </div>
+            </Layout>
+        )
+    }
+
+    const { restaurantId } = router.query
+
+    
+    if (!restaurantId || typeof restaurantId !== 'string') {
+        return (
+            <Layout>
+                <div className="flex justify-center items-center h-full">
+                    <p>Restaurant not found</p>
+                </div>
+            </Layout>
+        )
+    }
 
     return (
         <Layout>
             <DishesFeed
-                restaurantId={restaurantId as string} 
-                dishId={data.dishId}
+                restaurantId={restaurantId as string}
             />
+
             <div className="fixed bottom-6 self-center">
                 <CartButton 
                     restaurantId={restaurantId as string}
-
                 />
             </div>
         </Layout>

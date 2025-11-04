@@ -71,7 +71,7 @@ const DishCard: React.FC<DishCardProps> = ({
         <div className="bg-white rounded-lg shadow-md hover:shadow-xl cursor-pointer overflow-hidden">
             <div className="relative h-48 w-full">
                 {displayDish?.image_url ? (
-                    <Image src={displayDish.image_url} alt={displayDish.name ?? "Dish"} fill/>
+                    <Image src={displayDish.image_url} alt={displayDish.name ?? "Dish"} fill/>    
                 ) : (
                     <div className="h-full w-full bg-gray-100" />
                 )}

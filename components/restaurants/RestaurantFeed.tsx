@@ -16,7 +16,7 @@ const RestaurantFeed: React.FC<RestaurantFeedProps> = ({ search }) => {
             return restaurants;
         }
 
-    // filter restaurants by name, category, address
+        // filter restaurants by name, category, address
         const query = search.toLowerCase().trim(); 
         const filtered = restaurants.filter((restaurant: any) => {
             const nameMatch = restaurant.name?.toLowerCase().includes(query)
