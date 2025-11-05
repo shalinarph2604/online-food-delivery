@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";
 
-import getSupabaseAdmin from "@/libs/supabaseAdmin";
+import supabaseAdmin from "@/libs/supabaseAdmin";
 
 export default async function handler(
     req: NextApiRequest,
@@ -25,7 +25,6 @@ export default async function handler(
         }
 
         // Ensure envs exist and create admin client lazily
-        const supabaseAdmin = getSupabaseAdmin()
         const hashedpassword = await bcrypt.hash(password, 8)
 
         // Check if this email is already registered

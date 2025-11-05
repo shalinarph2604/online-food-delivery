@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import serverAuth from "@/libs/serverAuth";
-import supabase from "@/libs/supabase";
+import supabaseAdmin from "@/libs/supabaseAdmin";
 
 // to update or remove items from the cart
 export default async function handler(
@@ -37,31 +37,31 @@ export default async function handler(
                 if (quantity !== undefined) updateItem.quantity = quantity
                 if (notes !== undefined) updateItem.notes = notes
 
-            const { data: updatedCart, error: updatedError } = await supabase 
+            const { data: updatedCart, error: updatedError } = await supabaseAdmin 
                 .from('cart')
                 .update(updateItem)
-                .eq('dish_id', itemId)
+                .eq('id', itemId)
                 .eq('user_id', currentUser.id)
                 .eq('restaurant_id', restaurantId)
                 .select()
                 .single()
 
-                if (updatedError) throw new Error ('Failed to update cart')
+                if (updatedError) return res.status(400).json({ message: updatedError.message || 'Failed to update cart', details: updatedError.details, code: updatedError.code })
 
             return res.status(200).json(updatedCart)
         }
 
         if (req.method === 'DELETE') {
-            const { data: deletedCart, error: deletedError } = await supabase
+            const { data: deletedCart, error: deletedError } = await supabaseAdmin
                 .from('cart')
                 .delete()
-                .eq('dish_id', itemId)
+                .eq('id', itemId)
                 .eq('user_id', currentUser.id)
                 .eq('restaurant_id', restaurantId)
                 .select()
                 .single()
 
-                if (deletedError) throw new Error ('Failed to delete cart item')
+                if (deletedError) return res.status(400).json({ message: deletedError.message || 'Failed to delete cart item', details: deletedError.details, code: deletedError.code })
 
             return res.status(200).json(deletedCart)
         }

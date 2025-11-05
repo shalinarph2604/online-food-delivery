@@ -1,5 +1,6 @@
 // the UI of restaurant details, including the menu and reviews
 import DishesFeed from "@/components/dishes/DishesFeed";
+import useDishes from "@/hooks/useDishes";
 import Layout from "@/components/Layout";
 import CartButton from "@/components/dishes/CartButton";
 
@@ -28,7 +29,11 @@ const RestaurantView = () => {
     }
 
     const { restaurantId } = router.query
-
+    const ridString = typeof restaurantId === 'string' ? restaurantId : undefined
+    const { dishes = [] } = useDishes(ridString)
+    const restaurantName = Array.isArray(dishes)
+        ? (dishes.find((d: any) => d?.restaurant?.id === restaurantId)?.restaurant?.name ?? dishes[0]?.restaurant?.name ?? 'Restaurant')
+        : 'Restaurant'
     
     if (!restaurantId || typeof restaurantId !== 'string') {
         return (
@@ -41,17 +46,21 @@ const RestaurantView = () => {
     }
 
     return (
-        <Layout>
+        <div>
+            {/* Restaurant Header */}
+            <div className="pt-28 px-4 pb-2">
+                <h1 className="text-2xl font-bold">{restaurantName}</h1>
+            </div>
             <DishesFeed
                 restaurantId={restaurantId as string}
             />
 
-            <div className="fixed bottom-6 self-center">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
                 <CartButton 
                     restaurantId={restaurantId as string}
                 />
             </div>
-        </Layout>
+        </div>
     )
 }
 

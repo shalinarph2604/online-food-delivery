@@ -2,14 +2,16 @@ import { create } from 'zustand';
 
 interface CartModalStore {
     isOpen: boolean;
-    onOpen: () => void;
+    restaurantId?: string;
+    onOpen: (restaurantId: string) => void;
     onClose: () => void;
 }
 
-const useCartModal = create<LoginModalStore>((set) => ({
+const useCartModal = create<CartModalStore>((set) => ({
     isOpen: false,
-    onOpen: () => set({isOpen: true}),
-    onClose: () => set({isOpen: false}),
+    restaurantId: undefined,
+    onOpen: (restaurantId: string) => set({ isOpen: true, restaurantId }),
+    onClose: () => set({ isOpen: false, restaurantId: undefined }),
 }))
 
 export default useCartModal;

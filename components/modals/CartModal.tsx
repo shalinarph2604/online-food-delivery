@@ -7,6 +7,7 @@ import { getCart, updateCartItem, removeFromCart } from "@/services/cartService"
 
 import useCartModal from "@/hooks/useCartModal";
 import { useCallback, useState, useEffect, useMemo } from "react";
+import { mutate as swrMutate } from 'swr'
 import { useRouter } from "next/router";
 
 interface CartItem {
@@ -24,13 +25,7 @@ interface CartItem {
     }
 }
 
-interface CartModalProps {
-    restaurantId?: string
-}
-
-const CartModal: React.FC<CartModalProps> = ({ 
-    restaurantId
-}) => {
+const CartModal: React.FC = () => {
     const [cartItems, setCartItems] = useState<CartItem[]>([])
     const [isLoading, setIsLoading] = useState(false)
 
@@ -39,10 +34,10 @@ const CartModal: React.FC<CartModalProps> = ({
 
     const fetchCart = useCallback(() => {
         const getCartData = async () => {
-            if (cartModal.isOpen && restaurantId) {
+            if (cartModal.isOpen && cartModal.restaurantId) {
                 try {
                     setIsLoading(true)
-                    const data = await getCart(restaurantId)
+                    const data = await getCart(cartModal.restaurantId)
                     setCartItems(data)
 
                 } catch (error) {
@@ -54,21 +49,24 @@ const CartModal: React.FC<CartModalProps> = ({
         }
 
         getCartData()
-    },[cartModal.isOpen, restaurantId])
+    },[cartModal.isOpen, cartModal.restaurantId])
 
     useEffect(() => {
         if (!router.isReady) {
             return
         }
             fetchCart()
-        }, [cartModal.isOpen, restaurantId, fetchCart, router.isReady])
+        }, [cartModal.isOpen, cartModal.restaurantId, fetchCart, router.isReady])
 
     const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
-        if (!restaurantId) return
+        if (!cartModal.restaurantId) return
         
         try {
-            await updateCartItem(restaurantId, itemId, { quantity: newQuantity })
+            await updateCartItem(cartModal.restaurantId, itemId, { quantity: newQuantity })
             fetchCart() // Refresh cart data
+            // notify other views (e.g., DishesFeed) to revalidate cart/dishes
+            swrMutate(`/api/restaurant/${cartModal.restaurantId}/cart`)
+            swrMutate(`/api/restaurant/${cartModal.restaurantId}`)
         } catch (error) {
             console.log(error)
             toast.error("Failed to update quantity")
@@ -76,12 +74,15 @@ const CartModal: React.FC<CartModalProps> = ({
     }
 
     const handleRemoveItem = async (itemId: string) => {
-        if (!restaurantId) return
+        if (!cartModal.restaurantId) return
         
         try {
-            await removeFromCart(restaurantId, itemId)
+            await removeFromCart(cartModal.restaurantId, itemId)
             fetchCart() // Refresh cart data
             toast.success("Item removed from cart")
+            // notify other views (e.g., DishesFeed) to revalidate cart/dishes
+            swrMutate(`/api/restaurant/${cartModal.restaurantId}/cart`)
+            swrMutate(`/api/restaurant/${cartModal.restaurantId}`)
         } catch (error) {
             console.log(error)
             toast.error("Failed to remove item")
@@ -89,10 +90,15 @@ const CartModal: React.FC<CartModalProps> = ({
     }
 
     const handleUpdateNotes = async (itemId: string, notes: string) => {
-        if (!restaurantId) return
+        if (!cartModal.restaurantId) return
+        
+        // optimistic local update so input reflects immediately
+        setCartItems((prev) => prev.map((ci) => ci.id === itemId ? { ...ci, notes } : ci))
         
         try {
-            await updateCartItem(restaurantId, itemId, { notes })
+            await updateCartItem(cartModal.restaurantId, itemId, { notes })
+            // revalidate cart so notes stay consistent
+            swrMutate(`/api/restaurant/${cartModal.restaurantId}/cart`)
         } catch (error) {
             console.log(error)
             toast.error("Failed to update notes")
@@ -106,7 +112,7 @@ const CartModal: React.FC<CartModalProps> = ({
             setIsLoading(true)
 
             // Send all cart items to checkout
-            await axios.post((`/api/restaurant/${restaurantId}/checkout`), {
+            await axios.post((`/api/restaurant/${cartModal.restaurantId}/checkout`), {
                 cartItems: cartItems.map(item => ({
                     id: item.id,
                     dishId: item.dish_id,
@@ -119,7 +125,7 @@ const CartModal: React.FC<CartModalProps> = ({
             })
 
             cartModal.onClose()
-            router.push(`/restaurant/${restaurantId}/checkout`)
+            router.push(`/restaurant/${cartModal.restaurantId}/checkout`)
 
         } catch (error) {
             console.log(error)
@@ -132,9 +138,11 @@ const CartModal: React.FC<CartModalProps> = ({
 
     const countTotalPrice = useMemo(() => {
         if (!cartItems || !cartItems.length) return 0
-        return cartItems.reduce((accumulator, item) => 
-            accumulator + (item.dish?.price ?? 0) * (item.quantity ?? 0), 0
-        )
+        return cartItems.reduce((accumulator, item) => {
+            const price = Number(item.dish?.price ?? 0)
+            const qty = Number(item.quantity ?? 0)
+            return accumulator + price * qty
+        }, 0)
     }, [cartItems])
 
     const bodyContent = (
@@ -144,7 +152,8 @@ const CartModal: React.FC<CartModalProps> = ({
             ) : cartItems.length === 0 ? (
                 <div>There are no item here</div>
             ) : (
-                cartItems.map((item) => (
+                <div className="max-h-[60vh] overflow-y-auto pr-2">
+                    {cartItems.map((item) => (
                     <div key={item.id} className="flex gap-3 items-center p-3 border-b">
                         <div className="relative w-20 h-20 rounded overflow-hidden">
                             <Image
@@ -155,12 +164,12 @@ const CartModal: React.FC<CartModalProps> = ({
                             />
                         </div>
                         <div className="flex-1">
-                            <div className="font-medium">{item.dish?.name}</div>
+                            <div className="font-medium text-black text-lg">{item.dish?.name}</div>
                             <div className="text-purple-900 font-semibold">
                                 {new Intl.NumberFormat('id-ID', { 
                                     style: 'currency', 
                                     currency: 'IDR'
-                                }).format(item.dish?.price ?? 0)}
+                                }).format(Number(item.dish?.price ?? 0))}
                             </div>
                             
                             {/* Quantity Controls */}
@@ -195,13 +204,14 @@ const CartModal: React.FC<CartModalProps> = ({
                             {/* Remove Button */}
                             <button
                                 onClick={() => handleRemoveItem(item.id)}
-                                className="mt-2 text-red-500 text-sm hover:text-red-700"
+                                className="mt-2 ml-5 text-red-500 text-sm hover:text-red-700"
                             >
                                 Remove
                             </button>
                         </div>                        
                     </div>
-                ))
+                    ))}
+                </div>
             )}    
         </div>
     )

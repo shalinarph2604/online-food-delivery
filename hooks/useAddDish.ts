@@ -26,8 +26,13 @@ const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?:
         fetcher
     )
 
+    // Normalize cart shape to an array regardless of API response structure
+    const cartItems = Array.isArray(filledCart)
+        ? filledCart
+        : (filledCart?.items ?? filledCart?.data ?? [])
+
 // checking if the specific dish is already in the cart or not
-    const existing = (filledCart || []).find((it: any) => it.dish_id === dishId)
+    const existing = (cartItems as any[]).find((it: any) => it.dish_id === dishId)
 
     const addButton = useCallback(async () => {
         if (!user) return loginModal.onOpen()

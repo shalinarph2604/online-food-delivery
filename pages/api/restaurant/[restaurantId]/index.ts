@@ -30,7 +30,17 @@ export default async function handler(
         // server-side query using admin key
         const { data: dishes, error: dishesError } = await supabaseAdmin
             .from('dishes')
-            .select('id, name, restaurant_id')
+            .select(`
+                id,
+                name,
+                restaurant_id,
+                price,
+                image_url,
+                restaurant:restaurants(
+                    id,
+                    name
+                )
+            `)
             .eq('restaurant_id', rid);
 
         console.log('Primary query result:', { count: dishes?.length ?? null, dishes, dishesError });

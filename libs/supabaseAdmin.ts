@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 
+const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
 // Lazily create a server-side client with Service Role to avoid import-time crashes
 export const getSupabaseAdmin = () => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -15,6 +20,6 @@ export const getSupabaseAdmin = () => {
     return createClient(url, serviceRoleKey)
 }
 
-export default getSupabaseAdmin
+export default supabaseAdmin
 
 

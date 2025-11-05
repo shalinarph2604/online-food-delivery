@@ -13,7 +13,7 @@ const DishesFeed: React.FC<DishFeedProps> = ({ restaurantId, dishId, quantity })
 
     return (
         <div className="pt-36 px-4 pb-6">
-            <div className="grid grid-cols-2 gap-8">
+            <div className="gap-12">
                 {dishes.map((dish: Record<string, any>) => (
                     <DishCard
                         key={dish.id} 

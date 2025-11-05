@@ -32,7 +32,6 @@ const DishCard: React.FC<DishCardProps> = ({
         addButton,
         subtractButton,
         existing = [],
-        isProcessing
     } = useAddDish({ restaurantId, dishId })
 
     const { dish: fetchedDish } = useDish({ restaurantId, dishId })
@@ -47,9 +46,9 @@ const DishCard: React.FC<DishCardProps> = ({
         ? existing.find((it: any) => it.dish_id === dishId) ?? null
         : existing ?? null
 
-// disable subtract if quantity = 0 or processing or explicitly disabled
-    const existingQty = existingItem ? Number(existing.quantity ?? 0) : 0
-    const isSubtractDisabled = Number(quantity) <= 0 || existingQty <= 0 || isProcessing
+// disable subtract if quantity = 0 or less
+    const existingQty = existingItem ? Number((existingItem as any).quantity ?? 0) : 0
+    const isSubtractDisabled = existingQty <= 0
 
     const addToCart = useCallback(() => {
 
@@ -67,34 +66,44 @@ const DishCard: React.FC<DishCardProps> = ({
     }, [subtractButton, loginModal, user, isSubtractDisabled])
 
 
+    const formattedPrice = typeof displayDish?.price === 'number'
+        ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(displayDish.price)
+        : ''
+
     return (
-        <div className="bg-white rounded-lg shadow-md hover:shadow-xl cursor-pointer overflow-hidden">
-            <div className="relative h-48 w-full">
-                {displayDish?.image_url ? (
-                    <Image src={displayDish.image_url} alt={displayDish.name ?? "Dish"} fill/>    
-                ) : (
-                    <div className="h-full w-full bg-gray-100" />
-                )}
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
-                    <h2 className="text-xl font-bold mb-2 truncate">{displayDish?.name}</h2>
-                    <p className="text-purple-900 text-lg truncate">{displayDish?.price}</p>
+        <div className="bg-white w-full max-w-3xl mx-auto rounded-xl shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-4 p-3 sm:p-4">
+                <div className="relative w-28 h-28 sm:w-40 sm:h-24 rounded-md overflow-hidden bg-gray-50 flex-shrink-0">
+                    {displayDish?.image_url ? (
+                        <Image 
+                            src={displayDish.image_url}
+                            alt={displayDish.name ?? "Dish"}
+                            fill
+                            className="object-cover object-center"
+                            sizes="(max-width: 640px) 120px, 160px"
+                        />
+                    ) : (
+                        <div className="h-full w-full bg-gray-100" />
+                    )}
                 </div>
-                <div className="items-center gap-0.5">
+                <div className="flex-1 min-w-0">
+                    <h2 className="text-base sm:text-lg font-semibold leading-snug break-words">{displayDish?.name ?? 'Untitled Dish'}</h2>
+                    <p className="text-purple-900 text-sm sm:text-base font-medium mt-0.5">{formattedPrice}</p>
+                </div>
+                <div className="flex items-center gap-1">
                     <Button
-                        onClick={deleteFromCart} 
+                        onClick={deleteFromCart}
                         disabled={isSubtractDisabled}
                         label="-"
                         small
                         secondary
                     />
-                    <span className="text-sm font-normal">{existingQty}</span>
+                    <span className="text-sm sm:text-base font-semibold min-w-[1.5rem] text-center">{existingQty}</span>
                     <Button 
                         onClick={addToCart}
                         label="+"
                         small
-                        secondary
+                        primary
                     />
                 </div>
             </div>

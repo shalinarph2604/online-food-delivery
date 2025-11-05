@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import serverAuth from "@/libs/serverAuth";
-import supabase from "@/libs/supabase";
+import supabaseAdmin from "@/libs/supabaseAdmin";
 
 // to view the cart items and add items to the cart
 export default async function handler(
@@ -27,29 +27,42 @@ export default async function handler(
                 return res.status(400).json({ message: 'Invalid restaurant ID' })
             }
 
-            const { data: cart, error: cartError } = await supabase
+            const { data: cart, error: cartError } = await supabaseAdmin
                 .from('cart')
-                .select('*')
+                .select(`
+                    *,
+                    dish:dishes(
+                        name,
+                        price,
+                        image_url
+                    )
+                `)
                 .eq('restaurant_id', restaurantId)
-                .eq('user_id', currentUser.id);
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: true });
 
                 if (cartError) throw new Error('Failed to retrieve cart')
                 
                 if (!cart || cart.length === 0) {
-                    return res.status(200).json({ message: 'Your cart is empty' })
+                    return res.status(200).json([])
                 }
 
             return res.status(200).json(cart)
         }
 
         if (req.method === 'POST') {
-            const { dishId, quantity, restaurantId } = req.body
+            const { dishId, quantity } = req.body
+            const { restaurantId } = req.query
+
+            if (typeof restaurantId !== 'string') {
+                return res.status(400).json({ message: 'Invalid restaurant ID' })
+            }
 
             if (!dishId || typeof dishId !== 'string' || !quantity || typeof quantity !== 'number') {
                 return res.status(400).json({ message: 'Invalid dish ID or quantity' })
             }
-
-            const { data: updatedCart, error: updateError } = await supabase
+            // Try to insert; if unique violation occurs, increment quantity instead
+            const { data: inserted, error: insertError } = await supabaseAdmin 
                 .from('cart')
                 .insert([
                     {
@@ -62,9 +75,42 @@ export default async function handler(
                 .select()
                 .single()
 
-                if (updateError) throw new Error('Failed to add item to cart')
+            if (!inserted && insertError) {
+                // Unique violation (duplicate) → increment quantity
+                if ((insertError as any).code === '23505') {
+                    const { data: existingRow, error: fetchErr } = await supabaseAdmin
+                        .from('cart')
+                        .select('*')
+                        .eq('user_id', currentUser.id)
+                        .eq('restaurant_id', restaurantId)
+                        .eq('dish_id', dishId)
+                        .single()
 
-            return res.status(200).json(updatedCart)
+                    if (fetchErr || !existingRow) {
+                        return res.status(400).json({ message: fetchErr?.message || 'Failed to locate existing cart item', details: (fetchErr as any)?.details, code: (fetchErr as any)?.code })
+                    }
+
+                    const newQty = Number(existingRow.quantity ?? 0) + Number(quantity)
+
+                    const { data: updatedRow, error: updateErr } = await supabaseAdmin
+                        .from('cart')
+                        .update({ quantity: newQty })
+                        .eq('id', existingRow.id)
+                        .select()
+                        .single()
+
+                    if (updateErr) {
+                        return res.status(400).json({ message: updateErr.message || 'Failed to update cart quantity', details: (updateErr as any).details, code: (updateErr as any).code })
+                    }
+
+                    return res.status(200).json(updatedRow)
+                }
+
+                // Other errors
+                return res.status(400).json({ message: insertError.message || 'Failed to add item to cart', details: (insertError as any).details, code: (insertError as any).code })
+            }
+
+            return res.status(200).json(inserted)
         }
 
     } catch (error: any) {
