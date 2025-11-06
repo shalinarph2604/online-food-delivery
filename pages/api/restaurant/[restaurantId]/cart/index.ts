@@ -59,7 +59,7 @@ export default async function handler(
         }
 
         if (req.method === 'POST') {
-            const { dishId, quantity } = req.body
+            const { dishId, quantity, price, notes, image_url, total_price } = req.body
             const { restaurantId } = req.query
 
             if (typeof restaurantId !== 'string') {
@@ -77,7 +77,11 @@ export default async function handler(
                         user_id: currentUser.id,
                         restaurant_id: restaurantId,
                         dish_id: dishId,
-                        quantity: quantity
+                        quantity: quantity,
+                        price: price,
+                        notes: notes || null,
+                        image_url: image_url,
+                        total_price: total_price,
                     }
                 ])
                 .select()
@@ -91,7 +95,7 @@ export default async function handler(
                         .select('*')
                         .eq('user_id', currentUser.id)
                         .eq('restaurant_id', restaurantId)
-                        .eq('dish_id', dishId)
+                        .eq('dish_id', dish_id)
                         .single()
 
                     if (fetchErr || !existingRow) {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Modal from "../Modal";
 import Image from 'next/image'
 import Input from '../Input'
@@ -121,12 +122,12 @@ const CartModal: React.FC = () => {
             await axios.post((`/api/restaurant/${cartModal.restaurantId}/checkout`), {
                 cartItems: cartItems.map(item => ({
                     id: item.id,
-                    dishId: item.dish_id,
+                    dish_id: item.dish_id,
                     name: item.dish?.name,
                     price: item.dish?.price,
                     quantity: item.quantity,
                     notes: item.notes,
-                    imageUrl: item.dish?.image_url
+                    image_url: item.dish?.image_url
                 }))
             })
 

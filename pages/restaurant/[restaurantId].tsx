@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // the UI of restaurant details, including the menu and reviews
 import DishesFeed from "@/components/dishes/DishesFeed";
 import useDishes from "@/hooks/useDishes";

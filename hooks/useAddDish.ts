@@ -14,7 +14,7 @@ import useLoginModal from './useLoginModal'
 
 const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?: string}) => {
     const { user } = useCurrentUser()
-    const { mutateFetchedDish } = useDish({ restaurantId, dishId })
+    const { dish, mutateFetchedDish } = useDish({ restaurantId, dishId })
     const { mutateFetchedDishes } = useDishes(restaurantId)
 
     const [isProcessing, setIsProcessing] = useState(false)
@@ -47,9 +47,17 @@ const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?:
                     quantity: (existing.quantity ?? 0) + 1
                 })
             } else {
+                console.log({
+                    dishId,
+                    quantity: 1,
+                    });
+
                 await axios.post(`/api/restaurant/${restaurantId}/cart`, {
                     dishId,
-                    quantity: 1
+                    quantity: 1,
+                    price: dish.price,
+                    image_url: dish.image_url,
+                    total_price: dish.price * 1
                 })
             }
 
@@ -68,7 +76,16 @@ const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?:
             setIsProcessing(false)
         }
 
-    }, [user, restaurantId, dishId, loginModal, mutateCart, mutateFetchedDish, mutateFetchedDishes, existing])
+    }, [user,
+        restaurantId,
+        dishId,
+        loginModal,
+        mutateCart,
+        mutateFetchedDish,
+        mutateFetchedDishes,
+        existing,
+        dish
+    ])
 
     const subtractButton = useCallback(async () => {
 
