@@ -38,10 +38,16 @@ const CartModal: React.FC = () => {
                 try {
                     setIsLoading(true)
                     const data = await getCart(cartModal.restaurantId)
-                    setCartItems(data)
+                    // Normalize response - handle both dish (singular) and dishes (plural) from API
+                    const normalizedData = Array.isArray(data) ? data.map((item: any) => ({
+                        ...item,
+                        dish: item.dish || (Array.isArray(item.dishes) ? item.dishes[0] : item.dishes)
+                    })) : []
+                    setCartItems(normalizedData)
 
-                } catch (error) {
-                    console.log(error)
+                } catch (error: any) {
+                    console.error('Error fetching cart:', error)
+                    toast.error(error?.response?.data?.message || 'Cannot retrieve cart')
                 } finally {
                     setIsLoading(false)
                 }

@@ -38,7 +38,8 @@ export default async function handler(
                 image_url,
                 restaurant:restaurants(
                     id,
-                    name
+                    name,
+                    address
                 )
             `)
             .eq('restaurant_id', rid);

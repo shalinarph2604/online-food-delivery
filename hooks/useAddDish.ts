@@ -53,9 +53,12 @@ const useAddDish = ({ restaurantId, dishId } : { restaurantId?: string, dishId?:
                 })
             }
 
-            mutateCart?.()
-            mutateFetchedDish?.()
-            mutateFetchedDishes?.()
+            // Revalidate all related data
+            await Promise.all([
+                mutateCart?.(),
+                mutateFetchedDish?.(),
+                mutateFetchedDishes?.()
+            ])
 
             toast.success('Added to cart')
         } catch (error) {

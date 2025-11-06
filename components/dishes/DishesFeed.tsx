@@ -12,7 +12,7 @@ const DishesFeed: React.FC<DishFeedProps> = ({ restaurantId, dishId, quantity })
     const { dishes = [] } = useDishes(restaurantId)
 
     return (
-        <div className="pt-36 px-4 pb-6">
+        <div className="pt-8 px-4 pb-6">
             <div className="gap-12">
                 {dishes.map((dish: Record<string, any>) => (
                     <DishCard

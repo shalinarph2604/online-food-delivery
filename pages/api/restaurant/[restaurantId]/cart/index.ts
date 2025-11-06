@@ -31,7 +31,7 @@ export default async function handler(
                 .from('cart')
                 .select(`
                     *,
-                    dish:dishes(
+                    dishes(
                         name,
                         price,
                         image_url
@@ -39,15 +39,23 @@ export default async function handler(
                 `)
                 .eq('restaurant_id', restaurantId)
                 .eq('user_id', currentUser.id)
-                .order('created_at', { ascending: true });
 
-                if (cartError) throw new Error('Failed to retrieve cart')
+                if (cartError) {
+                    console.error('Cart query error:', cartError)
+                    return res.status(500).json({ message: 'Cannot retrieve cart', error: cartError.message })
+                }
                 
                 if (!cart || cart.length === 0) {
                     return res.status(200).json([])
                 }
 
-            return res.status(200).json(cart)
+            // Transform response to match expected structure (dishes -> dish)
+            const transformedCart = cart.map((item: any) => ({
+                ...item,
+                dish: item.dishes || item.dish
+            }))
+
+            return res.status(200).json(transformedCart)
         }
 
         if (req.method === 'POST') {
