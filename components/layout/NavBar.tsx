@@ -65,7 +65,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
                     <button onClick={() => handleNavigate('/')} aria-label='Home'>
                         <FaHome className="text-white text-xl hover:scale-110 transition"/>
                     </button>
-                    <button onClick={() => handleNavigate('/cart-general')} aria-label='Cart'>
+                    <button onClick={() => handleNavigate('/general-cart')} aria-label='Cart'>
                         <FaShoppingCart className="text-white text-xl hover:scale-110 transition"/>
                     </button>
                     <button onClick={() => handleNavigate('/orders')} aria-label='Orders'>

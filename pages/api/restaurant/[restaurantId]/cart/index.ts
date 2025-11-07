@@ -95,7 +95,7 @@ export default async function handler(
                         .select('*')
                         .eq('user_id', currentUser.id)
                         .eq('restaurant_id', restaurantId)
-                        .eq('dish_id', dish_id)
+                        .eq('dish_id', dishId)
                         .single()
 
                     if (fetchErr || !existingRow) {

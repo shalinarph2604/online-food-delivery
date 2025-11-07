@@ -16,25 +16,26 @@ export default async function handler(
 
         if (!currentUser) {
             return res.status(401).json({ message: 'User not authenticated'})
-        }
-
+        }  
+        
         const { data: getCart, error: getCartError } = await supabase
             .from('cart')
             .select('*')
             .eq('user_id', currentUser.id)
+            .eq('restaurant_id', req.query.restaurantCart)
 
             if (getCartError) {
                 throw new Error(getCartError.message)
             }
 
-            if (!getCart || getCart.length === 0) {
-                return res.status(200).json([])
+            if (!getCart) {
+                return res.status(200).json(null)
             }
 
         return res.status(200).json(getCart)
-        
+
     } catch (error: any) {
-        console.error('Error in dish API:', error)
+        console.log('Error in general cart by ID API:', error)
         return res.status(500).json({ message: error.message || 'Internal server error' })
     }
 }

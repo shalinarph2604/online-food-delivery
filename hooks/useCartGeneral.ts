@@ -2,9 +2,9 @@ import fetcher from "@/libs/fetcher";
 import useSWR from "swr";
 
 const useCartGeneral = () => {
-    const { data, error, mutate } = useSWR(`/api/cart`, fetcher);
+    const { data, error, mutate } = useSWR('/api/general-cart', fetcher);
     return {
-        cart: data,
+        carts: data,
         isLoading: !error && !data,
         isError: error,
         mutate
