@@ -35,12 +35,21 @@ interface CartCardData {
 
 interface CartCardProps {
     restaurantCart?: string
-    cartInfo: CartCardData
+    cartInfo: {
+        restaurant_id: string
+        restaurant: {
+            name: string
+            address: string
+        }
+        items: CartCardData[]
+    }
 }
 
 const CartCard: React.FC<CartCardProps> = ({ restaurantCart, cartInfo }) => {
-    const { cartRestaurant } = useCartCard(restaurantCart)
-    const { items } = useCartItems({ restaurantCart: cartInfo.restaurant_id, itemId: cartInfo.id })
+    console.log("CartCard props:", { restaurantCart, cartInfo })
+
+    const { cartRestaurant } = useCartCard(restaurantCart || cartInfo?.restaurant_id)
+    const { items } = useCartItems({ restaurantCart: cartInfo?.restaurant_id, itemId: cartInfo?.items[0]?.id })
     const router = useRouter()
     const loginModal = useLoginModal()
     const cartModal = useCartModal()
@@ -51,17 +60,12 @@ const CartCard: React.FC<CartCardProps> = ({ restaurantCart, cartInfo }) => {
         return Array.isArray(items) ? items : []
     }, [items])
 
-    console.log('🧺 cartInfo:', cartInfo)
-    console.log('📦 cartRestaurant:', cartRestaurant)
-    console.log('📜 items:', items)
-
-
     const totalPrice = useMemo(() => {
-        if (!fetchedCart || !fetchedCart.total_price || !fetchedItems.length) return 'Rp 0'
+        if (!fetchedCart || !fetchedItems.length) return 'Rp 0'
 
-        const total = fetchedItems.reduce((acc, item) => {
-            const price = Number(item.price)
-            const quantity = Number(item.quantity)
+        const total = fetchedItems.reduce((acc, fetchedItems) => {
+            const price = Number(fetchedItems.price)
+            const quantity = Number(fetchedItems.quantity)
             return acc + price * quantity
         }, 0)
 
@@ -71,12 +75,6 @@ const CartCard: React.FC<CartCardProps> = ({ restaurantCart, cartInfo }) => {
             minimumFractionDigits: 0,
         }).format(Number(total));
     }, [fetchedCart, fetchedItems])
-
-    const rupiahPrice = new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(Number(cartInfo.price));
 
     const goToRestaurant = useCallback((restaurantId: string) => {
         router.push(`/restaurant/${restaurantId}`)
@@ -102,38 +100,41 @@ const CartCard: React.FC<CartCardProps> = ({ restaurantCart, cartInfo }) => {
             <div onClick={() => goToRestaurant(cartInfo.restaurant_id)}
                 className="cursor-pointer mb-4"
             >
-                <h3>{cartInfo.restaurant?.name}</h3>
+                <h3 className="text-sm">{cartInfo.restaurant?.name}</h3>
                 <p>{cartInfo.restaurant?.address || ''}</p>
             </div>
 
             {/* Card Body */}
-            <div>
-                {fetchedItems.map((item: any) => (
-                    <div key={item.id}>
-                        <Image 
-                            src={item.image_url || '/images/default-dish.png'}
-                            alt={item.dish?.name || 'Dish Image'}
-                            width={100}
-                            height={100}
-                        />
-                        <div>
-                            <h4>{item.dish?.name}</h4>
+            <div className="w-full">
+                {cartInfo.items.map((item: any) => (
+                    <div key={item.id} className="grid grid-cols-3 gap-3">
+                        <div className="w-28 h-28 relative rounded-md overflow-hidden bg-gray-50">
+                            <Image 
+                                src={item?.image_url || '/images/default-dish.png'}
+                                alt={item?.restaurant?.name || 'Dish Image'}
+                                fill
+                            />
+                        </div>
+                        <div className="col-start-2 col-end-4">
+                            <h4>{item.dishes?.name}</h4>
                             <p>{item.notes}</p>
-                            <span className="text-purple-900">{rupiahPrice}</span>
+                            <span className="text-purple-900 text-md font-medium">{item.price}</span>
                         </div>
                     </div>
                 ))}
             </div>
-            <Separator className="my-4" />
+            <Separator className="my-4 text-gray-400" />
 
             {/* Card Footer */}
             <div>
                 <span className="text-purple-900 text-sm sm:text-base font-medium">{totalPrice}</span>
-                <Button 
-                    label="Checkout"
-                    primary
-                    onClick={readyToCheckout}
-                />
+                <div className="right-4 bottom-4">
+                    <Button 
+                        label="Checkout"
+                        primary
+                        onClick={readyToCheckout}
+                    />
+                </div>
             </div>
         </div>
     )
