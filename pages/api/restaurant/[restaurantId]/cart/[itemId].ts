@@ -33,9 +33,23 @@ export default async function handler(
                 return res.status(400).json({ message: 'There\'s no item in the cart' })
             }
 
-            const updateItem: any = {}
-                if (quantity !== undefined) updateItem.quantity = quantity
-                if (notes !== undefined) updateItem.notes = notes
+            const { data: price, error: priceError } = await supabaseAdmin
+                .from('cart')
+                .select('price')
+                .eq('id', itemId)
+                .eq('user_id', currentUser.id)
+                .eq('restaurant_id', restaurantId)
+                .single()
+
+                if (priceError) return res.status(400).json({ message: priceError.message || 'Failed to fetch item price', details: priceError.details, code: priceError.code })
+                
+            const newTotalPrice = Number(price.price ?? 0) * Number(quantity ?? 0)
+
+            const updateItem: any = {
+                quantity,
+                total_price: newTotalPrice,
+            }
+            if (notes !== undefined) updateItem.notes = notes
 
             const { data: updatedCart, error: updatedError } = await supabaseAdmin 
                 .from('cart')

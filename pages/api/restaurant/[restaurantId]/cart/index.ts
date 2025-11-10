@@ -103,10 +103,21 @@ export default async function handler(
                     }
 
                     const newQty = Number(existingRow.quantity ?? 0) + Number(quantity)
+                    
+                    const updatePrice = Number(existingRow.price ?? 0) * newQty
+
+                    console.log('Updating cart item:', {
+                        id: existingRow.id,
+                        oldQty: existingRow.quantity,
+                        added: quantity,
+                        newQty,
+                        oldPrice: existingRow.price,
+                        updatePrice,
+                        });
 
                     const { data: updatedRow, error: updateErr } = await supabaseAdmin
                         .from('cart')
-                        .update({ quantity: newQty })
+                        .update({ quantity: newQty, total_price: updatePrice })
                         .eq('id', existingRow.id)
                         .select()
                         .single()

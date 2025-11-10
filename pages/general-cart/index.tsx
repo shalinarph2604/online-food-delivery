@@ -1,4 +1,4 @@
-import CartFeed from "@/components/cart-general/CartFeed";
+import CartFeed from "@/components/general-cart/CartFeed";
 
 const CartGeneralPage = () => {
     return (

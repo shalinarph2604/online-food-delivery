@@ -43,7 +43,8 @@ export default async function handler(
                         acc[restaurantId] = {
                             restaurant_id: restaurantId,
                             restaurant: item.restaurant,
-                            items: []
+                            items: [],
+                            total_price: 0
                         }
                     }
                     acc[restaurantId].items.push(item)
